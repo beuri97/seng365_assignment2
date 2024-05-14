@@ -10,7 +10,7 @@ import {
     TextField, Typography
 } from "@mui/material";
 import {card, title} from "../style/cssStyle";
-import {ArrowDownward, ArrowDropDown, Search} from "@mui/icons-material";
+import {AccountCircleOutlined, ArrowDownward, BrokenImage, Search} from "@mui/icons-material";
 
 interface HeadCell {
     id: string,
@@ -31,16 +31,17 @@ const headCells: readonly HeadCell[]  = [
 
 const Petition = () => {
 
-    const [petitions, setPetitions] = React.useState<Array<Petition>>([]);
+    const [petitions ,setPetitions] = React.useState<Array<Petition>>([]);
+    const [totalPetitions, setTotalPetitions] = React.useState(0);
     const [errorFlag, setErrorFlag] = React.useState(false);
     const [errorMsg, setErrorMsg] = React.useState("");
-
     const getPetitions = () => {
         axios.get("http://localhost:4941/api/v1/petitions")
             .then(res => {
                 setErrorFlag(false);
                 setErrorMsg("");
-                setPetitions(res.data);
+                setPetitions(res.data['petitions']);
+                setTotalPetitions(res.data['count']);
             }, err => {
                 setErrorFlag(true);
                 setErrorMsg(err.toString());
@@ -54,11 +55,32 @@ const Petition = () => {
 
 
     const listPetition = () => {
-        petitions.map((row: User))
+        return petitions.map((row: Petition) => (
+                <TableRow hover tabIndex={-1} key={row.petitionId}>
+                    <TableCell>
+                        <img src={"arbitrary.jpg"} alt={"Image"}/>
+                    </TableCell>
+                    <TableCell>
+                        {row.title}
+                    </TableCell>
+                    <TableCell>
+                        {row.creationDate}
+                    </TableCell>
+                    <TableCell>
+                        {row.categoryId.toString()}
+                    </TableCell>
+                    <TableCell>
+                        {row.supportingCost}
+                    </TableCell>
+                    <TableCell>
+                        {row.ownerFirstName}
+                    </TableCell>
+                </TableRow>
+            ))
     }
 
     return (
-        <Container maxWidth="lg" style={card}>
+        <Container maxWidth="xl" style={card}>
             <h1 style={title}>Petition List</h1>
             <Card variant="outlined" style={{borderRadius: '25px'}}>
                 <Box display="flex" justifyContent={"center"} alignItems="center" marginBlock={'2rem'}>
@@ -98,7 +120,7 @@ const Petition = () => {
                             ))}</TableRow>
                     </TableHead>
                     <TableBody>
-
+                        {listPetition()}
                     </TableBody>
                 </Table>
             </TableContainer>

@@ -6,7 +6,8 @@ type Petition = {
     ownerId: number,
     ownerFirstName: string,
     ownerLastName: string,
-    numberOfSupporters: number
+    numberOfSupporters: number,
+    supportingCost: number
 }
 
 type Category = {

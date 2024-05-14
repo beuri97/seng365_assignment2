@@ -5,7 +5,7 @@ import {BarChart} from "@mui/icons-material";
 const NavBar = () => {
     return (
         <AppBar position="static">
-            <Container component="nav" maxWidth={"xl"}>
+            <Container component="nav" style={{marginRight: '10vw', marginLeft: '10vw'}} disableGutters>
                 <Toolbar disableGutters>
                     <BarChart sx={{display: 'flex', mr: 1}}/>
                     <Typography variant="h6" component="a" href={"/petition"}
