@@ -7,7 +7,8 @@ const card: CSS.Properties = {
 const title: CSS.Properties = {
     fontSize: '45px',
     display: 'flex',
-    alignItems: 'start'
+    alignItems: 'start',
+    marginLeft: '1rem'
 }
 
 export {card, title};

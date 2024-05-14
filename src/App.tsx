@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 import Petition from './components/Petition';
 import NotFound from "./components/NotFound";
 import NavBar from "./components/NavBar";
@@ -11,6 +11,7 @@ function App() {
             <NavBar/>
             <Router>
                 <Routes>
+                    <Route path={""} element={<Navigate to={'/petition'}/>}/>
                     <Route path={"/petition"} element={<Petition/>}/>
                     <Route path={"*"} element={<NotFound/>}/>
                 </Routes>
