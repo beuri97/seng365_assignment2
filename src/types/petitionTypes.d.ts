@@ -2,6 +2,7 @@ type Petition = {
     petitionId: number,
     title: string,
     categoryId: number,
+    categoryName: string,
     creationDate: string,
     ownerId: number,
     ownerFirstName: string,
