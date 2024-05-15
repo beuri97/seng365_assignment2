@@ -14,14 +14,15 @@ import {ArrowDownward, Search} from "@mui/icons-material";
 
 interface HeadCell {
     id: string,
-    label: string;
+    label: string,
+    toRight: boolean;
 }
 
 const headCells: readonly HeadCell[]  = [
 
-    {id: 'petition', label: 'Petition'},
-    {id: 'supportingCost', label: 'Minimum Cost'},
-    {id: 'owner', label: 'Owner'}
+    {id: 'petition', label: 'Petition', toRight: false},
+    {id: 'supportingCost', label: 'Minimum Cost', toRight: true},
+    {id: 'owner', label: 'Owner', toRight: false}
 ]
 
 
@@ -77,7 +78,7 @@ const Petition = () => {
                                 src={`http://localhost:4941/api/v1/petitions/${row.petitionId}/image`}
                                 alt={"Petition Image"}
                                 sx={{height: '150px', width: '150px', borderRadius: '25px', marginRight: '70px'}}/>
-                            <Box display={'table-row'} alignContent={'center'}>
+                            <Box display={'table-row'} alignContent={'center'} width={'35rem'}>
                                 <Box display={'flex'}>
                                     <Typography component={'p'} color={'lightgrey'}>Category:&nbsp;</Typography>
                                     <Typography component={'p'} color={'lightgrey'} fontStyle={'italic'}>
@@ -85,7 +86,10 @@ const Petition = () => {
                                     </Typography>
                                 </Box>
                                 <br/>
-                                <Typography variant={"h6"} sx={{ fontSize: '1.2rem'}}>{row.title}</Typography>
+
+                                <Typography variant={'h6'} sx={{ fontSize: '1rem'}}>
+                                    Title:&nbsp;{row.title}
+                                </Typography>
                                 <br/>
                                 <Box display={'inline-flex'}>
                                     <Typography component={'p'} color={'gray'}>Created:&nbsp;</Typography>
@@ -96,7 +100,7 @@ const Petition = () => {
                             </Box>
                         </Box>
                     </TableCell>
-                    <TableCell align={'center'}>
+                    <TableCell align={'right'}>
                         <Typography component={"p"} sx={{fontWeight: 'bold'}}>${row.supportingCost}</Typography>
                     </TableCell>
                     <TableCell>
@@ -144,7 +148,8 @@ const Petition = () => {
                         <TableHead>
                             <TableRow>
                                 {headCells.map((headCell) => (
-                                    <TableCell key={headCell.id} padding={'normal'} style={{fontWeight: 'bold'}} align={'left'}>
+                                    <TableCell key={headCell.id} padding={'normal'}
+                                               style={{fontWeight: 'bold'}} align={headCell.toRight ? 'right' : 'left'}>
                                         {headCell.label}
                                     </TableCell>
                                 ))}</TableRow>

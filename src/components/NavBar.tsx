@@ -1,5 +1,5 @@
 import React from "react";
-import {AppBar, Box, Container, Toolbar, Typography} from "@mui/material";
+import {AppBar, Container, Toolbar, Typography} from "@mui/material";
 import {BarChart} from "@mui/icons-material";
 
 const NavBar = () => {
