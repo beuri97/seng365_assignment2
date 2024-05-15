@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import {
     Accordion, AccordionDetails,
-    AccordionSummary,
+    AccordionSummary, Avatar,
     Box,
     Button,
     Card, CardMedia,
@@ -10,7 +10,7 @@ import {
     TextField, Typography
 } from "@mui/material";
 import {card, title} from "../style/cssStyle";
-import {ArrowDownward, Search} from "@mui/icons-material";
+import {AccountCircle, ArrowDownward, Search} from "@mui/icons-material";
 
 interface HeadCell {
     id: string,
@@ -100,11 +100,21 @@ const Petition = () => {
                             </Box>
                         </Box>
                     </TableCell>
-                    <TableCell align={'right'}>
+                    <TableCell align={'right'} width={'200'}>
                         <Typography component={"p"} sx={{fontWeight: 'bold'}}>${row.supportingCost}</Typography>
                     </TableCell>
                     <TableCell>
-                        {row.ownerFirstName + " " + row.ownerLastName}
+                        <Box display={'flex'} alignContent={'center'}>
+                            <Avatar src={`http://localhost:4941/api/v1/users/${row.ownerId}/image`}
+                                    alt={row.ownerLastName}
+                                    sx={{bgcolor: '#' + Math.floor(Math.random()*16777215).toString(16),
+                                        marginInline: '2rem',
+                                        width: '72px',
+                                        height: '72px'}}/>
+                            <Typography alignContent={'center'}>
+                                {row.ownerFirstName + " " + row.ownerLastName}
+                            </Typography>
+                        </Box>
                     </TableCell>
                 </TableRow>
             ))
@@ -143,7 +153,8 @@ const Petition = () => {
                         </AccordionDetails>
                     </Accordion>
                 </Card>
-                <TableContainer component={Paper} style={{marginBlock: '3rem', borderRadius: '25px'}}>
+                <TableContainer component={Paper}
+                                style={{marginBlock: '3rem', borderRadius: '25px'}}>
                     <Table>
                         <TableHead>
                             <TableRow>
