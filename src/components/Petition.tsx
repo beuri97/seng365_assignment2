@@ -181,9 +181,9 @@ const Petition = () => {
         return (
             <Container maxWidth="xl" style={card}>
                 <h1 style={title}>Petition List</h1>
-                <Card variant="outlined" style={{borderRadius: '25px'}}>
+                <Card id={'filter-card'} variant="outlined" style={{borderRadius: '25px'}}>
 
-                    <Box display="flex" justifyContent={"center"} alignItems="center" marginBlock={'2rem'}>
+                    <Box id={'search-bar'} display="flex" justifyContent={"center"} alignItems="center" marginBlock={'2rem'}>
                         <TextField size={"small"} id="search"
                                    variant="outlined" label={"Search"}
                                    style={{width: "40rem", marginRight: '1rem'}} value={searchTerm}
@@ -203,28 +203,35 @@ const Petition = () => {
                         </AccordionSummary>
 
                         <AccordionDetails style={{marginBottom: '2vw', display: ''}}>
+                            <Box id={'filter top'} borderTop='lightgrey solid 1px' paddingBlock='1.5rem'>
+                                <FormControlLabel id={"No Filter CheckBox"}
+                                                  control={<Checkbox checked={noFilterBox}
+                                                                     onChange={() => setNoFilterBox(!noFilterBox)}/>}
+                                                  label={"No Filter"}/>
 
-                            <FormControlLabel id={"No Filter CheckBox"}
-                                              control={<Checkbox checked={noFilterBox}
-                                                                 onChange={() => setNoFilterBox(!noFilterBox)}/>}
-                                              label={"No Filter"}/>
+                                <TextField size={"small"} id={"minimumCostField"} variant={"outlined"}
+                                           label={"Minimum Cost"} style={{width: "25rem", marginLeft: '30rem'}}
+                                           value={minimumCost} onChange={(event: React.ChangeEvent<HTMLInputElement>) => {setMinimumCost(event.target.value);}}
+                                           InputProps={{
+                                               startAdornment: <InputAdornment position="start">$</InputAdornment>
+                                           }}/>
+                            </Box>
 
-                            <TextField size={"small"} id={"minimumCostField"} variant={"outlined"}
-                                       label={"Minimum Cost"} style={{width: "25rem", marginLeft: '30rem'}}
-                                       value={minimumCost} onChange={(event: React.ChangeEvent<HTMLInputElement>) => {setMinimumCost(event.target.value);}}
-                                       InputProps={{
-                                           startAdornment: <InputAdornment position="start">$</InputAdornment>
-                                       }}/>
+                            <Box id={'filter-categories'} borderTop='lightgrey solid 1px' paddingTop='1.5rem'>
+                                <Typography color={'gray'} fontWeight={'bold'}
+                                            fontSize={'1.2rem'} marginLeft={'1rem'}
+                                            textAlign={'start'}>Category</Typography>
+                                <Grid container spacing={{xs: 2, md: 3}} columns={{xs: 4, sm: 8, md: 12}} paddingLeft={'2rem'} paddingTop={'1.5rem'}>
+                                    {categories.map(category => (
+                                        <Grid item xs={2} sm={4} md={4} key={category.categoryId}
+                                              textAlign={'start'}>
+                                            <FormControlLabel control={<Checkbox/>} label={category.name}/>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Box>
 
-                            <Grid container spacing={{xs: 2, md: 3}} columns={{xs: 4, sm: 8, md: 12}}>
 
-                                <FormGroup>
-                                    <Grid item xs={2} sm={4} md={4}>
-                                        {/*    TODO - Need to implement Filter Here    */}
-                                    </Grid>
-                                </FormGroup>
-
-                            </Grid>
                         </AccordionDetails>
                     </Accordion>
 
