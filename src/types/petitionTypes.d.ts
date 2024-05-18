@@ -13,5 +13,6 @@ type Petition = {
 
 type Category = {
     categoryId: number,
-    name: string
+    name: string,
+    checked: boolean
 }

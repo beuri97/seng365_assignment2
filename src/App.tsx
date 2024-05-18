@@ -11,8 +11,8 @@ function App() {
             <NavBar/>
             <Router>
                 <Routes>
-                    <Route path={""} element={<Navigate to={'/petition'}/>}/>
-                    <Route path={"/petition"} element={<Petition/>}/>
+                    <Route path={""} element={<Navigate to={'/petitions'}/>}/>
+                    <Route path={"/petitions"} element={<Petition/>}/>
                     <Route path={"*"} element={<NotFound/>}/>
                 </Routes>
             </Router>

@@ -1,32 +1,23 @@
 import React from "react";
 import axios from "axios";
-import {Link} from "react-router-dom";
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Avatar,
+    Accordion, AccordionDetails, AccordionSummary,
     Box,
     Button,
     Card,
-    CardMedia,
     Checkbox,
-    Container,
+    Container, FormControl,
     FormControlLabel,
-    FormGroup,
-    Grid, InputAdornment,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
+    Grid, InputAdornment, InputLabel, MenuItem, NativeSelect,
+    Paper, Select,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     TextField,
     Typography
 } from "@mui/material";
 import {card, title} from "../style/cssStyle";
 import {ArrowDownward, Search} from "@mui/icons-material";
+import {PetitionTableRow} from "./PetitionObject";
+import petitionStore from "../store";
 
 interface HeadCell {
     id: string,
@@ -45,16 +36,60 @@ const headCells: readonly HeadCell[]  = [
 
 const Petition = () => {
 
-    const [petitions ,setPetitions] = React.useState<Array<Petition>>([]);
-    const [totalPetitions, setTotalPetitions] = React.useState(0);
-    const [searchTerm, setSearchTerm] = React.useState("");
-    const [startIndex, setStartIndex] = React.useState("");
-    const [count, setCount] = React.useState(0);
-    const [minimumCost, setMinimumCost] = React.useState("");
-    const [noFilterBox, setNoFilterBox] = React.useState(true);
-    const [errorFlag, setErrorFlag] = React.useState(false);
-    const [errorMsg, setErrorMsg] = React.useState("");
-    const [categories, setCategories] = React.useState<Array<Category>>([]);
+    // const [petitions ,setPetitions] = React.useState<Array<Petition>>([]);
+    // const [totalPetitions, setTotalPetitions] = React.useState(0);
+    // const [searchTerm, setSearchTerm] = React.useState("");
+    // const [startIndex, setStartIndex] = React.useState("");
+    // const [minimumCost, setMinimumCost] = React.useState("");
+    // const [noFilterBox, setNoFilterBox] = React.useState(true);
+    // const [sort, setSort] = React.useState('CREATED_ASC');
+    // const [errorFlag, setErrorFlag] = React.useState(false);
+    // const [errorMsg, setErrorMsg] = React.useState("");
+    // const [categories, setCategories] = React.useState<Array<Category>>([]);
+
+    const petitions = petitionStore(state => state.petitionsList);
+    const categories = petitionStore(state => state.categories);
+    const searchTerm = petitionStore(state => state.searchTerm);
+    const noFilterBox = petitionStore(state => state.noFilterBox);
+    const minimumCost = petitionStore(state => state.minimumCost);
+    const sort = petitionStore(state => state.sort);
+    const errorFlag = petitionStore(state => state.errorFlag);
+    const errorMsg = petitionStore(state => state.errorMsg);
+    const setPetitions = petitionStore(state => state.setPetitions);
+    const setCategories = petitionStore(state => state.setCategories);
+    const setSearchTerm = petitionStore(state => state.setSearchTerm);
+    const setNoFilterBox = petitionStore(state => state.setNoFilterBox);
+    const setMinimumCost = petitionStore(state => state.setMinimumCost);
+    const setSort = petitionStore(state => state.setSort);
+    const setErrorFlag = petitionStore(state => state.setErrorFlag);
+    const setErrorMsg = petitionStore(state => state.setErrorMsg);
+
+    const handleSortEvent = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSort(event.target.value);
+    }
+
+    const checkNoFilter = () => {
+        if(categories.every(category => !category.checked) && minimumCost === "") {
+            setNoFilterBox(true);
+        }
+    }
+    const handleNoFilterBox = () => {
+        setMinimumCost("");
+        setCategories(categories.map(category => ({...category, checked: false})));
+        setNoFilterBox(true);
+    }
+
+    const handleMinimumCost = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setMinimumCost(event.target.value);
+        setNoFilterBox(false);
+    }
+
+    const handleCategoryBoxes = (categoryId: number) => {
+
+        setCategories(categories.map(category => category.categoryId === categoryId ? ({...category, checked: !category.checked}) : category));
+        setNoFilterBox(false);
+
+    }
 
 
     const startSearch = (query: string) => {
@@ -63,7 +98,7 @@ const Petition = () => {
                 setErrorFlag(false);
                 setErrorMsg("");
                 setPetitions(res.data['petitions']);
-                setTotalPetitions(res.data['count']);
+                // setTotalPetitions(res.data['count']);
             }, err => {
                 setErrorFlag(true);
                 setErrorMsg(err.toString());
@@ -74,8 +109,12 @@ const Petition = () => {
 
         let query = "?";
         query += searchTerm !== "" ? ("q=" + searchTerm) : "";
+        categories.forEach(category => {category.checked && (query += `&categoryIds=${category.categoryId}`);});
+        query += minimumCost !== "" ? `&supportingCost=${minimumCost}` : "";
+        query === "?" ? query += `sortBy=${sort}` : query += `&sortBy=${sort}`
 
-        startSearch(query === "?" ? "" : query);
+        console.log(query);
+        startSearch(query);
     }
 
 
@@ -83,7 +122,8 @@ const Petition = () => {
     const getCategories = () => {
         axios.get("http://localhost:4941/api/v1/petitions/categories")
             .then(res => {
-                setCategories(res.data);
+                setCategories(res.data.map((category: Category) => ({categoryId: category.categoryId, name: category.name, checked: false})))
+
             })
     }
 
@@ -94,8 +134,9 @@ const Petition = () => {
             .then(res => {
                 setErrorFlag(false);
                 setErrorMsg("");
-                setPetitions(res.data['petitions']);
-                setTotalPetitions(res.data['count']);
+                const result = res.data['petitions'];
+                setPetitions(result);
+                // setTotalPetitions(res.data['count']);
             }, err => {
                 setErrorFlag(true);
                 setErrorMsg(err.toString());
@@ -104,79 +145,20 @@ const Petition = () => {
 
     React.useEffect(() => {
         getPetitions();
+        getCategories();
         },[]);
 
-    React.useEffect(() => {
-        getCategories();
-    }, []);
 
     const listPetition = () => {
         return petitions.map((row: Petition) => (
-                <TableRow hover tabIndex={-1} key={row.petitionId}>
-                    <TableCell align={'left'} width={'500'}>
-
-                        <Link to={`/petitions/${row.petitionId}`} style={{textDecoration: 'none', display: 'flex'}} >
-
-                            <CardMedia
-                                component="img"
-                                src={`http://localhost:4941/api/v1/petitions/${row.petitionId}/image`}
-                                alt={"Petition Image"}
-                                sx={{height: '150px', width: '150px', borderRadius: '25px', marginRight: '70px'}}/>
-
-                            <Box display={'table-row'} alignContent={'center'} width={'35rem'}>
-                                <Box display={'flex'}>
-                                    <Typography component={'p'} color={'lightgrey'}>Category:&nbsp;</Typography>
-                                    <Typography component={'p'} color={'lightgrey'} fontStyle={'italic'}>
-                                        {categories.find(category => category.categoryId === row.categoryId)?.name}
-                                    </Typography>
-                                </Box>
-
-                                <br/>
-
-                                <Typography variant={'h6'}
-                                            sx={{ fontSize: '1rem', '&:hover':{textDecoration: 'underline'}}}
-                                            fontWeight={'bold'} color={'black'}>
-                                    Title:&nbsp;{row.title}
-                                </Typography>
-
-                                <br/>
-
-                                <Box display={'inline-flex'}>
-                                    <Typography component={'p'} color={'gray'}>Created:&nbsp;</Typography>
-                                    <Typography component={'p'} color={'gray'} fontStyle={'italic'}>
-                                        {row.creationDate.split("T")[0]}
-                                    </Typography>
-
-                                </Box>
-                            </Box>
-                        </Link>
-
-                    </TableCell>
-
-                    <TableCell align={'right'} width={'200'}>
-                        <Typography component={"p"} sx={{fontWeight: 'bold'}}>${row.supportingCost}</Typography>
-                    </TableCell>
-
-                    <TableCell>
-                        <Box display={'flex'} alignContent={'center'}>
-                            <Avatar src={`http://localhost:4941/api/v1/users/${row.ownerId}/image`}
-                                    alt={row.ownerLastName}
-                                    sx={{bgcolor: '#' + Math.floor(Math.random()*16777215).toString(16),
-                                        marginInline: '2rem',
-                                        width: '72px',
-                                        height: '72px'}}/>
-                            <Typography alignContent={'center'}>
-                                {row.ownerFirstName + " " + row.ownerLastName}
-                            </Typography>
-                        </Box>
-                    </TableCell>
-
-                </TableRow>
-            ))
+            <PetitionTableRow key={row.petitionId} petition={row} categories={categories}/>))
     }
+
 
     // -----------------------------------Main Container--------------------------------------------
 
+    // console.log(petitions);
+    console.log(typeof petitions);
     if (!errorFlag)
         return (
             <Container maxWidth="xl" style={card}>
@@ -185,7 +167,8 @@ const Petition = () => {
 
                     <Box id={'search-bar'} display="flex" justifyContent={"center"} alignItems="center" marginBlock={'2rem'}>
                         <TextField size={"small"} id="search"
-                                   variant="outlined" label={"Search"}
+                                   label={"Search"}
+                                   variant={'standard'}
                                    style={{width: "40rem", marginRight: '1rem'}} value={searchTerm}
                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                        setSearchTerm(event.target.value);}}/>
@@ -193,7 +176,7 @@ const Petition = () => {
                                 color={'primary'} onClick={queryExecution} ><Search/></Button>
                     </Box>
 
-                    <Accordion id={"Filter Accordion"}>
+                    <Accordion id={"Filter Accordion"} onChange={() => checkNoFilter()}>
                         <AccordionSummary expandIcon={<ArrowDownward/>}>
                             <Typography variant={'h6'} component={'h6'} marginLeft={'1rem'}
                                         sx={{marginRight: '16%'}}>Filter</Typography>
@@ -202,19 +185,35 @@ const Petition = () => {
                             </Typography>
                         </AccordionSummary>
 
-                        <AccordionDetails style={{marginBottom: '2vw', display: ''}}>
+                        <AccordionDetails style={{marginBottom: '2vw'}}>
                             <Box id={'filter top'} borderTop='lightgrey solid 1px' paddingBlock='1.5rem'>
                                 <FormControlLabel id={"No Filter CheckBox"}
-                                                  control={<Checkbox checked={noFilterBox}
-                                                                     onChange={() => setNoFilterBox(!noFilterBox)}/>}
+                                                  control={<Checkbox checked={noFilterBox} disabled={noFilterBox}
+                                                                     onChange={() => handleNoFilterBox()}/>}
                                                   label={"No Filter"}/>
 
-                                <TextField size={"small"} id={"minimumCostField"} variant={"outlined"}
-                                           label={"Minimum Cost"} style={{width: "25rem", marginLeft: '30rem'}}
-                                           value={minimumCost} onChange={(event: React.ChangeEvent<HTMLInputElement>) => {setMinimumCost(event.target.value);}}
+                                <TextField size={"small"} id={"minimumCostField"} variant={'standard'}
+                                           label={"Minimum Cost"}
+                                           style={{width: "25rem", marginLeft: '15rem', marginRight: '15rem'}}
+                                           value={minimumCost}
+                                           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {handleMinimumCost(event)}}
                                            InputProps={{
                                                startAdornment: <InputAdornment position="start">$</InputAdornment>
                                            }}/>
+
+                                <FormControl>
+                                    <InputLabel id={'sorting-label'}>Sort</InputLabel>
+                                    <NativeSelect value={sort} variant={'outlined'}
+                                                  onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {handleSortEvent(event)}}
+                                                  >
+                                        <option value={'ALPHABETICAL_ASC'}>Ascending Alphabetically</option>
+                                        <option value={'ALPHABETICAL_DESC'}>Descending Alphabetically</option>
+                                        <option value={'COST_ASC'}>Ascending by supporting cost</option>
+                                        <option value={'COST_DESC'}>Descending by supporting cost</option>
+                                        <option value={'CREATED_ASC'}>Ascending by creation date</option>
+                                        <option value={'CREATED_DESC'}>Descending creation date</option>
+                                    </NativeSelect>
+                                </FormControl>
                             </Box>
 
                             <Box id={'filter-categories'} borderTop='lightgrey solid 1px' paddingTop='1.5rem'>
@@ -225,7 +224,12 @@ const Petition = () => {
                                     {categories.map(category => (
                                         <Grid item xs={2} sm={4} md={4} key={category.categoryId}
                                               textAlign={'start'}>
-                                            <FormControlLabel control={<Checkbox/>} label={category.name}/>
+                                            <FormControlLabel
+                                                key={category.categoryId}
+                                                control={<Checkbox checked={category.checked}
+                                                                   onChange={() => {
+                                                                       handleCategoryBoxes(category.categoryId);}}/>}
+                                                label={category.name}/>
                                         </Grid>
                                     ))}
                                 </Grid>

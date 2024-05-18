@@ -8,7 +8,7 @@ const NavBar = () => {
             <Container component="nav" style={{marginRight: '10vw', marginLeft: '10vw'}} disableGutters>
                 <Toolbar disableGutters>
                     <BarChart sx={{display: 'flex', mr: 1}}/>
-                    <Typography variant="h6" component="a" href={"/petition"}
+                    <Typography variant="h6" component="a" href={"/petitions"}
                                 sx={{mr: 'flex', fontFamily: 'monospace', fontWeight: 700,
                                     letterSpacing: '0.1rem', textDecoration: 'none', color: "inherit"}}>
                         PETITION
