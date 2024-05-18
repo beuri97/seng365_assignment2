@@ -36,17 +36,6 @@ const headCells: readonly HeadCell[]  = [
 
 const Petition = () => {
 
-    // const [petitions ,setPetitions] = React.useState<Array<Petition>>([]);
-    // const [totalPetitions, setTotalPetitions] = React.useState(0);
-    // const [searchTerm, setSearchTerm] = React.useState("");
-    // const [startIndex, setStartIndex] = React.useState("");
-    // const [minimumCost, setMinimumCost] = React.useState("");
-    // const [noFilterBox, setNoFilterBox] = React.useState(true);
-    // const [sort, setSort] = React.useState('CREATED_ASC');
-    // const [errorFlag, setErrorFlag] = React.useState(false);
-    // const [errorMsg, setErrorMsg] = React.useState("");
-    // const [categories, setCategories] = React.useState<Array<Category>>([]);
-
     const petitions = petitionStore(state => state.petitionsList);
     const categories = petitionStore(state => state.categories);
     const searchTerm = petitionStore(state => state.searchTerm);
@@ -118,17 +107,6 @@ const Petition = () => {
     }
 
 
-
-    const getCategories = () => {
-        axios.get("http://localhost:4941/api/v1/petitions/categories")
-            .then(res => {
-                setCategories(res.data.map((category: Category) => ({categoryId: category.categoryId, name: category.name, checked: false})))
-
-            })
-    }
-
-
-
     const getPetitions = () => {
         axios.get("http://localhost:4941/api/v1/petitions")
             .then(res => {
@@ -141,11 +119,15 @@ const Petition = () => {
                 setErrorFlag(true);
                 setErrorMsg(err.toString());
             })
+        axios.get("http://localhost:4941/api/v1/petitions/categories")
+            .then(res => {
+                setCategories(res.data.map((category: Category) => ({categoryId: category.categoryId, name: category.name, checked: false})))
+
+            })
     }
 
     React.useEffect(() => {
         getPetitions();
-        getCategories();
         },[]);
 
 
@@ -157,8 +139,7 @@ const Petition = () => {
 
     // -----------------------------------Main Container--------------------------------------------
 
-    // console.log(petitions);
-    console.log(typeof petitions);
+
     if (!errorFlag)
         return (
             <Container maxWidth="xl" style={card}>

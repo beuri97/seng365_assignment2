@@ -1,7 +1,4 @@
 import create from 'zustand';
-import React from "react";
-import {ftruncate} from "node:fs";
-
 
 interface PetitionState {
     petitionsList: Petition[],
@@ -19,7 +16,7 @@ interface PetitionState {
     setCategories: (categories: Category[]) => void,
     setSort: (sortBy: string) => void,
     setErrorFlag: (errorFlag: boolean) => void,
-    setErrorMsg: (msg: string) => void,
+    setErrorMsg: (msg: string) => void
 }
 
 const getLocalStorage = (key: string) => JSON.parse(localStorage.getItem(key) as string);
