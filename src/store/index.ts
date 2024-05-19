@@ -11,6 +11,7 @@ interface PetitionState {
     errorFlag: boolean,
     errorMsg: string,
     setPetitions: (petitions: Petition[]) => void,
+    setPage: (count: number) => void,
     setSearchTerm: (searchTerm: string) => void,
     setNoFilterBox: (status: boolean) => void,
     setMinimumCost: (min: string) => void,
@@ -37,6 +38,10 @@ const petitionStore = create<PetitionState>(set => ({
     setPetitions: (petitions: Petition[]) => set(() => {
         setLocalStorage('petitions', petitions);
         return {petitionsList: petitions || []};
+    }),
+
+    setPage: (count: number) => set(() => {
+        return {count: Math.ceil(count / 10)}
     }),
 
     setSearchTerm: (searchTerm: string) => set(() => {
