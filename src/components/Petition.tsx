@@ -9,8 +9,8 @@ import {
     Container, FormControl,
     FormControlLabel,
     Grid, InputAdornment, InputLabel, MenuItem, NativeSelect,
-    Paper, Select,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Paper,
+    Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TablePagination, TableRow,
     TextField,
     Typography
 } from "@mui/material";
@@ -32,11 +32,10 @@ const headCells: readonly HeadCell[]  = [
     {id: 'owner', label: 'Owner', toRight: false}
 ]
 
-
-
 const Petition = () => {
 
     const petitions = petitionStore(state => state.petitionsList);
+    const count = petitionStore(state => state.count);
     const categories = petitionStore(state => state.categories);
     const searchTerm = petitionStore(state => state.searchTerm);
     const noFilterBox = petitionStore(state => state.noFilterBox);
@@ -133,7 +132,7 @@ const Petition = () => {
 
     const listPetition = () => {
         return petitions.map((row: Petition) => (
-            <PetitionTableRow key={row.petitionId} petition={row} categories={categories}/>))
+            <PetitionTableRow key={row.petitionId} petition={row} count={count} categories={categories}/>))
     }
 
 
@@ -236,7 +235,13 @@ const Petition = () => {
                         <TableBody>
                             {listPetition()}
                         </TableBody>
+                        <TableFooter>
+                            <TableRow>
+                                <TablePagination rowsPerPageOptions={[5,6,7,8,9,10]} count={count} page={0} rowsPerPage={} onPageChange={}/>
+                            </TableRow>
+                        </TableFooter>
                     </Table>
+
                 </TableContainer>
 
             </Container>

@@ -2,6 +2,7 @@ import create from 'zustand';
 
 interface PetitionState {
     petitionsList: Petition[],
+    count: number,
     categories: Category[],
     searchTerm: string,
     noFilterBox:boolean,
@@ -24,11 +25,12 @@ const setLocalStorage = (key: string, value: any) => window.localStorage.setItem
 
 const petitionStore = create<PetitionState>(set => ({
     petitionsList: getLocalStorage('petitionsList') || [],
-    categories: getLocalStorage('categories') || [],
-    searchTerm: getLocalStorage('searchTerm') || "",
-    noFilterBox: getLocalStorage('noFilterBox') || true,
-    minimumCost: getLocalStorage('minimumCost') || "",
-    sort: getLocalStorage('sort') || 'CREATED_ASC',
+    count: 0,
+    categories: [],
+    searchTerm: "",
+    noFilterBox: true,
+    minimumCost: "",
+    sort: 'CREATED_ASC',
     errorFlag: false,
     errorMsg: '',
 

@@ -4,7 +4,8 @@ import {Link} from "react-router-dom";
 
 interface PetitionProp {
     petition: Petition,
-    categories: Category[]
+    categories: Category[],
+    count: number
 }
 
 
