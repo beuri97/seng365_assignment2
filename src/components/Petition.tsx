@@ -3,7 +3,7 @@ import {
     Avatar,
     Box,
     CardMedia,
-    Container, Paper,
+    Container, Pagination, Paper, Stack,
     Table, TableBody,
     TableCell,
     TableContainer,
@@ -12,6 +12,9 @@ import {
     Typography
 } from "@mui/material";
 import {card, title} from "../style/cssStyle";
+import {useParams} from "react-router-dom";
+import petitionStore from "../store";
+import axios from "axios";
 
 interface headCellTier {
     id: string,
@@ -38,8 +41,41 @@ const headCellSupporters: readonly headCellSupporter[]  = [
     {id: 'supporter'  , label: 'Supporter'}
 ]
 
+interface petitionsHeadCell {
+    id: string,
+    label: string,
+    toRight: boolean;
+}
+
+const petitionsHeadCells: readonly petitionsHeadCell[]  = [
+
+    {id: 'petition', label: 'Petition', toRight: false},
+    {id: 'supportingCost', label: 'Minimum Cost', toRight: true},
+    {id: 'owner', label: 'Owner', toRight: false}
+]
+
 
 const Petition = () => {
+    const {petitionId} = useParams();
+    const [petition, setPetition] = React.useState<Petition>();
+    const petitions = petitionStore(state => state.petitionsList);
+    const setPetitions = petitionStore(state => state.setPetitions);
+    const errorFlag = petitionStore(state => state.errorFlag);
+    const setErrorFlag = petitionStore(state => state.setErrorFlag);
+    const errorMsg = petitionStore(state => state.errorMsg);
+    const setErrorMsg = petitionStore(state => state.setErrorMsg);
+
+
+
+    React.useEffect(() => {
+        axios.get(`http://localhost:4941/api/v1/petitions/${petitionId}`)
+            .then(res => {
+                setErrorFlag(false);
+                setErrorMsg("");
+                setPetition(res.data);
+
+            })
+    }, [])
 
     return (
         <Container maxWidth={'lg'} sx={card}>
@@ -55,7 +91,7 @@ const Petition = () => {
                 </Box>
                 <Box display={'flex'} alignItems={'center'}>
                     <Typography marginRight={'2rem'} fontWeight={'bold'}>Owner:</Typography>
-                    <Avatar src={`http://localhost:4941/api/v1/users/20/image`}
+                    <Avatar src={`http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
                             alt={"Hello"}
                             sx={{marginInline: '0.5rem',
                                 width:  '55px',
@@ -126,11 +162,30 @@ const Petition = () => {
             <Typography variant={'h6'} fontWeight={'bold'}
                         marginTop={'4rem'} marginBottom={'1rem'} textAlign={'left'}>Similar Petitions</Typography>
 
-            <TableContainer>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            {petitionsHeadCells.map((headCell) => (
+                                <TableCell key={headCell.id} padding={'normal'}
+                                           style={{fontWeight: 'bold'}} align={headCell.toRight ? 'right' : 'left'}>
+                                    {headCell.label}
+                                </TableCell>
+                            ))}</TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {/*{listPetition()}*/}
+                    </TableBody>
+                </Table>
+            {/*    <Stack  display={'flex'} justifyContent={'center'}>*/}
+            {/*        <Typography marginTop={'1rem'}>*/}
+            {/*            Petition: {1+(10*(pageNum -1))} - {(count < (10 * pageNum) )? count : (10 * pageNum)}*/}
+            {/*        </Typography>*/}
+            {/*        <Pagination count={page} page={pageNum} sx={{display: 'flex', justifyContent: 'center', marginY: '1rem'}}*/}
+            {/*                    showFirstButton showLastButton onChange={pageChange}/>*/}
+            {/*    </Stack>*/}
 
             </TableContainer>
-
-
         </Container>
     )
 }

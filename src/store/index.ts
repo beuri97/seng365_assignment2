@@ -1,7 +1,7 @@
 import create from 'zustand';
 
 interface PetitionState {
-    petitionsList: Petition[],
+    petitionsList: Petitions[],
     count: number,
     categories: Category[],
     searchTerm: string,
@@ -10,7 +10,7 @@ interface PetitionState {
     sort: string,
     errorFlag: boolean,
     errorMsg: string,
-    setPetitions: (petitions: Petition[]) => void,
+    setPetitions: (petitions: Petitions[]) => void,
     setPage: (count: number) => void,
     setSearchTerm: (searchTerm: string) => void,
     setNoFilterBox: (status: boolean) => void,
@@ -35,7 +35,7 @@ const petitionStore = create<PetitionState>(set => ({
     errorFlag: false,
     errorMsg: '',
 
-    setPetitions: (petitions: Petition[]) => set(() => {
+    setPetitions: (petitions: Petitions[]) => set(() => {
         setLocalStorage('petitions', petitions);
         return {petitionsList: petitions || []};
     }),

@@ -126,7 +126,7 @@ const Petitions = () => {
 
 
     const listPetition = () => {
-        return petitions.map((petition: Petition) => (
+        return petitions.map((petition: Petitions) => (
             <TableRow hover tabIndex={-1} key={petition.petitionId}>
                 <TableCell align={'left'} width={'500'}>
 
