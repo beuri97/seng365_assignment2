@@ -91,6 +91,9 @@ const Petition = () => {
                 setErrorMsg("");
                 setPetition(res.data);
 
+            }, err => {
+                setErrorFlag(true);
+                setErrorMsg(err.toString());
             });
 
         axios.get(`http://localhost:4941/api/v1/petitions/${id}/supporters`)
@@ -98,6 +101,9 @@ const Petition = () => {
                 setErrorFlag(false);
                 setErrorMsg("");
                 setSupporters(res.data);
+            }, err => {
+                setErrorFlag(true);
+                setErrorMsg(err.toString());
             });
     }, [id]);
 
@@ -109,6 +115,9 @@ const Petition = () => {
                 setPetitions(res.data['petitions']
                     .filter((temp: Petitions) => temp.petitionId !== petition.petitionId &&
                         (temp.ownerId === petition.ownerId || temp.categoryId === petition.categoryId)));
+            }, err => {
+                setErrorFlag(true);
+                setErrorMsg(err.toString());
             })
     }, [petition]);
 
@@ -230,115 +239,121 @@ const Petition = () => {
         ))
     }
 
-    return (
-        <Container maxWidth={'lg'} style={card}>
+    if (!errorFlag)
+        return (
+            <Container maxWidth={'lg'} style={card}>
 
 
-            <Container id={'petition-title-container'}
-                       sx={{display: 'flex' , alignContent: 'center',
-                           justifyContent: 'space-between', marginBottom: '1rem'}}>
-                <Box id={'title'}>
-                    <Typography variant={'h1'} sx={title} fontWeight={'bold'}>{petition.title}</Typography>
-                    <Typography marginLeft={'1rem'} display={'flex'} marginY={'1rem'}
-                                alignItems={'start'} color={'gray'}>CREATION DATE: {petition.creationDate.split('T')[0]}</Typography>
-                </Box>
-                <Box display={'flex'} alignItems={'center'}>
-                    <Typography marginRight={'2rem'} fontWeight={'bold'}>Owner:</Typography>
-                    <Avatar src={`http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
-                            alt={"Hello"}
-                            sx={{marginInline: '0.5rem',
-                                width:  '55px',
-                                height: '55px'}}/>
-                    <Typography alignContent={'center'}>
-                        {petition.ownerFirstName + ' ' + petition.ownerLastName}
-                    </Typography>
-                </Box>
-            </Container>
-
-            <Container id={'petition-description-container'} sx={{marginY: '2rem',  display: 'flex'}}>
-                <CardMedia
-                    component="img"
-                    src={`http://localhost:4941/api/v1/petitions/${petition.petitionId}/image`}
-                    alt={"Petition Image"}
-                    sx={{height: '32rem', marginLeft: '1rem',
-                          width: '32rem', borderRadius: '25px', marginRight: '70px'}}/>
-                <Box id={'information-box'} display={'block'} alignContent={'top'} marginY={'1rem'}>
-                    <Box id={'description-box'} textAlign={'left'} height={"24rem"}>
-                        <Typography id={'description-title'} variant={'h6'} fontWeight={'bold'} marginTop={'2rem'}>DESCRIPTION</Typography>
-                        <Typography id={"description"} marginY={'1rem'}>{petition.description}</Typography>
+                <Container id={'petition-title-container'}
+                           sx={{display: 'flex' , alignContent: 'center',
+                               justifyContent: 'space-between', marginBottom: '1rem'}}>
+                    <Box id={'title'}>
+                        <Typography variant={'h1'} sx={title} fontWeight={'bold'}>{petition.title}</Typography>
+                        <Typography marginLeft={'1rem'} display={'flex'} marginY={'1rem'}
+                                    alignItems={'start'} color={'gray'}>CREATION DATE: {petition.creationDate.split('T')[0]}</Typography>
                     </Box>
-                    <Box id={'support-information'} textAlign={'left'} marginTop={'1rem'}>
-                        <Typography id={'num-of-supporter'} variant={'h5'} fontWeight={'bold'}>Number of Supporters: {petition.numberOfSupporters}</Typography>
-                        <Typography id={'total-raised'} variant={'h5'} fontWeight={'bold'}>Total Raised: ${petition.moneyRaised}</Typography>
+                    <Box display={'flex'} alignItems={'center'}>
+                        <Typography marginRight={'2rem'} fontWeight={'bold'}>Owner:</Typography>
+                        <Avatar src={`http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
+                                alt={"Hello"}
+                                sx={{marginInline: '0.5rem',
+                                    width:  '55px',
+                                    height: '55px'}}/>
+                        <Typography alignContent={'center'}>
+                            {petition.ownerFirstName + ' ' + petition.ownerLastName}
+                        </Typography>
                     </Box>
-                </Box>
-            </Container>
+                </Container>
 
-            <Typography variant={'h6'} fontWeight={'bold'}
-                        textAlign={'left'} marginTop={"4rem"} marginBottom={'1rem'}>Available Support Tier</Typography>
-            <TableContainer id={'tier-table-container'}>
-                <Table>
+                <Container id={'petition-description-container'} sx={{marginY: '2rem',  display: 'flex'}}>
+                    <CardMedia
+                        component="img"
+                        src={`http://localhost:4941/api/v1/petitions/${petition.petitionId}/image`}
+                        alt={"Petition Image"}
+                        sx={{height: '32rem', marginLeft: '1rem',
+                              width: '32rem', borderRadius: '25px', marginRight: '70px'}}/>
+                    <Box id={'information-box'} display={'block'} alignContent={'top'} marginY={'1rem'}>
+                        <Box id={'description-box'} textAlign={'left'} height={"24rem"}>
+                            <Typography id={'description-title'} variant={'h6'} fontWeight={'bold'} marginTop={'2rem'}>DESCRIPTION</Typography>
+                            <Typography id={"description"} marginY={'1rem'}>{petition.description}</Typography>
+                        </Box>
+                        <Box id={'support-information'} textAlign={'left'} marginTop={'1rem'}>
+                            <Typography id={'num-of-supporter'} variant={'h5'} fontWeight={'bold'}>Number of Supporters: {petition.numberOfSupporters}</Typography>
+                            <Typography id={'total-raised'} variant={'h5'} fontWeight={'bold'}>Total Raised: ${petition.moneyRaised}</Typography>
+                        </Box>
+                    </Box>
+                </Container>
+
+                <Typography variant={'h6'} fontWeight={'bold'}
+                            textAlign={'left'} marginTop={"4rem"} marginBottom={'1rem'}>Available Support Tier</Typography>
+                <TableContainer id={'tier-table-container'}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                {headCellTiers.map((headCell) => (
+                                    <TableCell key={headCell.id} padding={'normal'} sx={{fontWeight: 'bold'}} align={'left'}>
+                                        {headCell.label}
+                                    </TableCell>))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {getSupportTier()}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                <Typography variant={'h6'} fontWeight={'bold'}
+                            marginTop={'4rem'} marginBottom={'1rem'} textAlign={'left'}>Supporters</Typography>
+
+                <TableContainer id={'table-container'}>
                     <TableHead>
                         <TableRow>
-                            {headCellTiers.map((headCell) => (
+                            {headCellSupporters.map(headCell => (
                                 <TableCell key={headCell.id} padding={'normal'} sx={{fontWeight: 'bold'}} align={'left'}>
                                     {headCell.label}
-                                </TableCell>))}
+                                </TableCell>
+                            ))}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {getSupportTier()}
+                        {getSupporter()}
                     </TableBody>
-                </Table>
-            </TableContainer>
-
-            <Typography variant={'h6'} fontWeight={'bold'}
-                        marginTop={'4rem'} marginBottom={'1rem'} textAlign={'left'}>Supporters</Typography>
-
-            <TableContainer id={'table-container'}>
-                <TableHead>
-                    <TableRow>
-                        {headCellSupporters.map(headCell => (
-                            <TableCell key={headCell.id} padding={'normal'} sx={{fontWeight: 'bold'}} align={'left'}>
-                                {headCell.label}
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {getSupporter()}
-                </TableBody>
-            </TableContainer>
+                </TableContainer>
 
 
-            <Typography variant={'h6'} fontWeight={'bold'}
-                        marginTop={'4rem'} marginBottom={'1rem'} textAlign={'left'}>Similar Petitions</Typography>
+                <Typography variant={'h6'} fontWeight={'bold'}
+                            marginTop={'4rem'} marginBottom={'1rem'} textAlign={'left'}>Similar Petitions</Typography>
 
-            <TableContainer>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            {petitionsHeadCells.map((headCell) => (
-                                <TableCell key={headCell.id} padding={'normal'}
-                                           style={{fontWeight: 'bold'}} align={headCell.toRight ? 'right' : 'left'}>
-                                    {headCell.label}
-                                </TableCell>
-                            ))}</TableRow>
-                    </TableHead>
-                    {petitions.length !== 0 && (
-                        <TableBody>
-                            {listPetition()}
-                        </TableBody>
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                {petitionsHeadCells.map((headCell) => (
+                                    <TableCell key={headCell.id} padding={'normal'}
+                                               style={{fontWeight: 'bold'}} align={headCell.toRight ? 'right' : 'left'}>
+                                        {headCell.label}
+                                    </TableCell>
+                                ))}</TableRow>
+                        </TableHead>
+                        {petitions.length !== 0 && (
+                            <TableBody>
+                                {listPetition()}
+                            </TableBody>
+                        )}
+                    </Table>
+                    {petitions.length === 0 && (
+                        <Typography fontStyle={'italic'} display={'flex'} justifyContent={'center'} marginTop={'1rem'}>
+                            No Similar Petitions Found
+                        </Typography>
                     )}
-                </Table>
-                {petitions.length === 0 && (
-                    <Typography fontStyle={'italic'} display={'flex'} justifyContent={'center'} marginTop={'1rem'}>
-                        No Similar Petitions Found
-                    </Typography>
-                )}
-            </TableContainer>
-        </Container>
-    )
+                </TableContainer>
+            </Container>
+        )
+
+    else
+        return (
+            <h1>{errorMsg}</h1>
+        )
 }
 
 

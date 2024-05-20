@@ -2,6 +2,7 @@ import React from "react";
 import {AppBar, Box, Button, Container, Toolbar, Typography} from "@mui/material";
 import {BarChart} from "@mui/icons-material";
 import {loginState} from "../store";
+import {Link} from "react-router-dom";
 
 const NavBar = () => {
 
@@ -20,7 +21,7 @@ const NavBar = () => {
                     <Box sx={{flexGrow: 1}}></Box>
                     {authorization === "" && (
                         <Box marginRight={'11vw'}>
-                            <Button color={'inherit'}>Register</Button>
+                            <Button color={'inherit'} component={'a'} href={'/register'}>Register</Button>
                             <Button color={'inherit'}>Login</Button>
                         </Box>
                     )}

@@ -5,6 +5,7 @@ import Petitions from './components/Petitions';
 import NotFound from "./components/NotFound";
 import NavBar from "./components/NavBar";
 import Petition from "./components/Petition";
+import Register from "./components/Register";
 
 function App() {
     return (
@@ -15,6 +16,7 @@ function App() {
                     <Route path={""} element={<Navigate to={'/petitions'}/>}/>
                     <Route path={"/petitions"} element={<Petitions/>}/>
                     <Route path={"/petitions/:id"} element={<Petition/>}/>
+                    <Route path={"/register"} element={<Register/>}/>
                     <Route path={"*"} element={<NotFound/>}/>
                 </Routes>
             </Router>
