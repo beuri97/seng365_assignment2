@@ -27,7 +27,7 @@ const setLocalStorage = (key: string, value: any) => window.localStorage.setItem
 const petitionStore = create<PetitionState>(set => ({
     petitionsList: getLocalStorage('petitionsList') || [],
     count: 0,
-    categories: [],
+    categories: getLocalStorage('categories') || [],
     searchTerm: "",
     noFilterBox: true,
     minimumCost: "",
@@ -57,6 +57,7 @@ const petitionStore = create<PetitionState>(set => ({
     }),
 
     setCategories: (categories: Category[]) => set(() => {
+        setLocalStorage('categories', categories)
         return {categories: categories};
     }),
 

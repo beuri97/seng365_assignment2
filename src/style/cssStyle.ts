@@ -1,7 +1,7 @@
 import CSS from 'csstype';
 
 const card: CSS.Properties = {
-    marginTop: '5rem',
+    marginBlock: '5rem',
     minWidth:'90rem'
 }
 

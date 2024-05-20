@@ -22,7 +22,7 @@ type Petition = {
     creationDate: string,
     numberOfSupporters: number,
     moneyRaised: number,
-    supportTiers: number,
+    supportTiers: SupportTier[],
 }
 
 type Category = {
