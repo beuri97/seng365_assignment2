@@ -1,5 +1,9 @@
 import create from 'zustand';
 
+
+const getLocalStorage = (key: string) => JSON.parse(localStorage.getItem(key) as string);
+const setLocalStorage = (key: string, value: any) => window.localStorage.setItem(key, JSON.stringify(value));
+
 interface PetitionState {
     petitionsList: Petitions[],
     count: number,
@@ -20,9 +24,6 @@ interface PetitionState {
     setErrorFlag: (errorFlag: boolean) => void,
     setErrorMsg: (msg: string) => void
 }
-
-const getLocalStorage = (key: string) => JSON.parse(localStorage.getItem(key) as string);
-const setLocalStorage = (key: string, value: any) => window.localStorage.setItem(key, JSON.stringify(value));
 
 const petitionStore = create<PetitionState>(set => ({
     petitionsList: getLocalStorage('petitionsList') || [],
@@ -73,4 +74,22 @@ const petitionStore = create<PetitionState>(set => ({
     })
 }))
 
-export default petitionStore;
+const getSessionStorage = (key: string) => JSON.parse(sessionStorage.getItem(key) as string);
+const setSessionStorage = (key: string, value: any) => window.sessionStorage.setItem(key, JSON.stringify(value));
+
+interface LoginState {
+    authorization: string,
+    setAuthorization: (token: string) => void,
+}
+
+const loginState = create<LoginState>(set => ({
+
+    authorization: getSessionStorage('authToken') || "",
+
+    setAuthorization: (token: string) => set(() => {
+        setSessionStorage('authToken', token);
+        return {authorization: token};
+    })
+}))
+
+export {petitionStore, loginState};

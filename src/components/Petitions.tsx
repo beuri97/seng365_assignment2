@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import {card, title} from "../style/cssStyle";
 import {ArrowDownward, Search} from "@mui/icons-material";
-import petitionStore from "../store";
+import {petitionStore} from "../store";
 import {Link} from "react-router-dom";
 
 interface HeadCell {

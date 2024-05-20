@@ -3,7 +3,7 @@ import {
     Avatar,
     Box, Button,
     CardMedia,
-    Container, Paper,
+    Container,
     Table, TableBody,
     TableCell,
     TableContainer,
@@ -12,8 +12,8 @@ import {
     Typography
 } from "@mui/material";
 import {card, title} from "../style/cssStyle";
-import {Link, useParams} from "react-router-dom";
-import petitionStore from "../store";
+import {useParams} from "react-router-dom";
+import {petitionStore} from "../store";
 import axios from "axios";
 
 interface headCellTier {
