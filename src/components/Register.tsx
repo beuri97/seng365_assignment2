@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {ChangeEvent} from 'react';
 import {card} from "../style/cssStyle";
 import {Avatar, Box, Button, Card, Container, TextField, Typography} from "@mui/material";
 
 const Register = () => {
 
-    const [image, setImage] = React.useState(undefined);
+    const [image, setImage] = React.useState("");
     const [firstName, setFirstName] = React.useState("");
     const [lastName, setLastName] = React.useState("");
     const [email, setEmail] = React.useState("");
@@ -18,7 +18,6 @@ const Register = () => {
     const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLastName(e.target.value);
     }
-
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(e.target.value);
     }
@@ -44,7 +43,10 @@ const Register = () => {
                     type="file"
                     accept="image/*"
                     style={{display: 'none'}}
-                    // onChange={handleImageChange}
+                    onChange={(event:React.ChangeEvent<HTMLInputElement>) => {
+                        const files = event.target.files as FileList;
+                        setImage(URL.createObjectURL(files[0]));
+                    }}
                 />
                 <label htmlFor="avatar-upload">
                     <Button variant="contained" component="span">

@@ -21,8 +21,8 @@ const NavBar = () => {
                     <Box sx={{flexGrow: 1}}></Box>
                     {authorization === "" && (
                         <Box marginRight={'11vw'}>
-                            <Button color={'inherit'} component={'a'} href={'/register'}>Register</Button>
-                            <Button color={'inherit'}>Login</Button>
+                            <Button variant={'text'} color={'inherit'} component={'a'} href={'/register'}>Register</Button>
+                            <Button variant={'text'} color={'inherit'}>Login</Button>
                         </Box>
                     )}
                 </Toolbar>
