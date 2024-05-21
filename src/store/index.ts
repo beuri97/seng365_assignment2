@@ -9,7 +9,6 @@ interface PetitionState {
     count: number,
     categories: Category[],
     searchTerm: string,
-    noFilterBox:boolean,
     minimumCost: string,
     sort: string,
     errorFlag: boolean,
@@ -17,7 +16,6 @@ interface PetitionState {
     setPetitions: (petitions: Petitions[]) => void,
     setPage: (count: number) => void,
     setSearchTerm: (searchTerm: string) => void,
-    setNoFilterBox: (status: boolean) => void,
     setMinimumCost: (min: string) => void,
     setCategories: (categories: Category[]) => void,
     setSort: (sortBy: string) => void,
@@ -30,7 +28,6 @@ const petitionStore = create<PetitionState>(set => ({
     count: 0,
     categories: getLocalStorage('categories') || [],
     searchTerm: "",
-    noFilterBox: true,
     minimumCost: "",
     sort: 'CREATED_ASC',
     errorFlag: false,
@@ -47,9 +44,6 @@ const petitionStore = create<PetitionState>(set => ({
 
     setSearchTerm: (searchTerm: string) => set(() => {
         return {searchTerm: searchTerm}
-    }),
-    setNoFilterBox: (status) => set(() => {
-        return {noFilterBox: status};
     }),
 
     setMinimumCost: (min: string) => set(() => {
@@ -78,18 +72,25 @@ const getSessionStorage = (key: string) => JSON.parse(sessionStorage.getItem(key
 const setSessionStorage = (key: string, value: any) => window.sessionStorage.setItem(key, JSON.stringify(value));
 
 interface LoginState {
-    authorization: string,
+    token: string,
+    user: { userId: number, firstName: string, lastName: string },
     setAuthorization: (token: string) => void,
+    setUser: (user: { userId: number, firstName: string, lastName: string }) => void,
 }
 
 const loginState = create<LoginState>(set => ({
 
-    authorization: getSessionStorage('authToken') || "",
+    token: getSessionStorage('authToken') || "",
+    user: getSessionStorage('user') || { userId: -1, firstName: '', lastName: '' },
 
     setAuthorization: (token: string) => set(() => {
         setSessionStorage('authToken', token);
-        return {authorization: token};
-    })
+        return {token: token};
+    }),
+    setUser: (user) => set(() => {
+        setSessionStorage('user', user);
+        return {user: user};
+    }),
 }))
 
 export {petitionStore, loginState};

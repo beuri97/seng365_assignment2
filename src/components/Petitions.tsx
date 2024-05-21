@@ -130,7 +130,7 @@ const Petitions = () => {
             <TableRow hover tabIndex={-1} key={petition.petitionId}>
                 <TableCell align={'left'} width={'500'}>
 
-                    <Link to={`/petitions/${petition.petitionId}`} style={{textDecoration: 'none', display: 'flex'}} >
+                    <Link to={`/petitions/${petition.petitionId}`} style={{textDecoration: 'none', display: 'flex'}} reloadDocument={true} >
 
                         <CardMedia
                             component="img"

@@ -6,6 +6,7 @@ import NotFound from "./components/NotFound";
 import NavBar from "./components/NavBar";
 import Petition from "./components/Petition";
 import Register from "./components/Register";
+import Login from "./components/Login";
 
 function App() {
     return (
@@ -17,6 +18,7 @@ function App() {
                     <Route path={"/petitions"} element={<Petitions/>}/>
                     <Route path={"/petitions/:id"} element={<Petition/>}/>
                     <Route path={"/register"} element={<Register/>}/>
+                    <Route path={"/login"} element={<Login/>}/>
                     <Route path={"*"} element={<NotFound/>}/>
                 </Routes>
             </Router>
