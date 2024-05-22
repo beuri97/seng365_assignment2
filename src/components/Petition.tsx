@@ -358,3 +358,4 @@ const Petition = () => {
 
 
 export default Petition;
+export {headCellTiers};

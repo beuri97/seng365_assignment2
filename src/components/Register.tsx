@@ -100,6 +100,7 @@ const Register = () => {
                     style={{display: 'none'}}
                     onChange={(event:React.ChangeEvent<HTMLInputElement>) => {
                         const files = event.target.files as FileList;
+                        console.log (URL.createObjectURL(files[0]));
                         setImage(files[0]);
                     }}
                 />

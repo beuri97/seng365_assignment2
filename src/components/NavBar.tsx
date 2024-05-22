@@ -42,7 +42,6 @@ const NavBar = () => {
                         <Box marginRight={'11vw'} display={'inline-flex'}>
                             <Box display={'flex'} alignItems={'center'} >
                                 <Avatar src={`http://localhost:4941/api/v1/users/${user.userId}/image`}
-                                        alt={"Hello"}
                                         sx={{marginInline: '0.5rem',
                                             width:  '40px',
                                             height: '40px'}}/>

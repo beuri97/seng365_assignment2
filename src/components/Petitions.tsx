@@ -3,7 +3,7 @@ import axios from "axios";
 import {
     Accordion, AccordionDetails, AccordionSummary, Avatar,
     Box,
-    Button,
+    Button, ButtonBase,
     Card, CardMedia,
     Checkbox,
     Container, FormControl,
@@ -197,6 +197,7 @@ const Petitions = () => {
         return (
             <Container maxWidth="xl" style={card}>
                 <h1 style={title}>Petition List</h1>
+                <Link to={'/petitions/create'}>Create New Petition</Link>
                 <Card id={'filter-card'} variant="outlined" style={{borderRadius: '25px'}}>
 
                     <Box id={'search-bar'} display="flex" justifyContent={"center"} alignItems="center"
