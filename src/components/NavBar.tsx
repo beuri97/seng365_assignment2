@@ -29,7 +29,7 @@ const NavBar = () => {
                             <Button variant={'text'} color={'inherit'} component={'a'} href={'/login'}>Login</Button>
                         </Box>
                     )}
-                    {user.userId !== -1 && (
+                    {authorization !== "" && (
                         <Box marginRight={'11vw'} display={'inline-flex'}>
                             <Box display={'flex'} alignItems={'center'} >
                                 <Avatar src={`http://localhost:4941/api/v1/users/${user.userId}/image`}

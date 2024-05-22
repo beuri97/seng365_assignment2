@@ -3,6 +3,7 @@ import {card} from "../style/cssStyle";
 import {Avatar, Box, Button, Card, Container, TextField, Typography} from "@mui/material";
 import axios from "axios";
 import {loginState} from "../store";
+import {useNavigate} from "react-router-dom";
 
 const Register = () => {
 
@@ -16,6 +17,10 @@ const Register = () => {
     const [password, setPassword] = React.useState("");
     const [errorFlags, setErrorFlags] = React.useState([false,false,false,false]);
     const [errorMsgs, setErrorMsgs] = React.useState(["", "", "", ""]);
+    const [loggedIn, setLoggedIn] = React.useState(false);
+    const setUser = loginState(state => state.setUser);
+    const navigate = useNavigate();
+
     let userId: number = 0;
 
 
@@ -31,35 +36,7 @@ const Register = () => {
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(e.target.value);
     }
-    const logInUser = (userId: number) => {
 
-        if (isNaN(userId)) return
-        axios.post(`http://localhost:4941/api/v1/users/login`, {email: email, password: password})
-            .then(res => {
-                console.log(res.data.token);
-                setAuthentication(res.data.token);
-            }, err => {
-                console.log(err.toString());
-            })
-
-
-    }
-    const saveUserImage = (userId: number) => {
-
-        console.log(authentication);
-        const headers = {
-            'X-Authorization': authentication
-        }
-        axios.put(`http://localhost:4941/api/v1/users/${userId}/image`, {image: image}, {headers})
-
-    }
-    const registerProgress = () => {
-        registerUser();
-        logInUser(userId);
-        saveUserImage(userId);
-
-
-    }
     const registerUser = () => {
 
         // TODO - Check validity here
@@ -69,10 +46,34 @@ const Register = () => {
             .then(r => {
                 console.log(r.data.userId);
                 userId = r.data.userId;
+                axios.post(`http://localhost:4941/api/v1/users/login`, {email: email, password: password})
+                    .then(async res => {
+                        console.log(res.data.token);
+                        console.log(res.data.userId);
+                        setAuthentication(res.data.token);
+                        if (image !== null) {
+
+                            const fileData = Buffer.from(await image.arrayBuffer());
+
+                            const headers = {
+                                "Content-Type": image?.type,
+                                'X-Authorization': res.data.token,
+                            };
+                            axios.put(`http://localhost:4941/api/v1/users/${userId}/image`, fileData, {headers})
+                                .then(res => {
+                                    console.log(res.data.token)
+                                    setUser({userId: r.data.userId, firstName: firstName, lastName: lastName})
+                                    navigate('/petitions')
+                                })
+                        }
+                    }, err => {
+                        console.log(err.toString());
+                    })
             }, err => {
                 console.log(err);
             } );
     }
+
     return (
         <Container style={card}>
             <Typography variant={'h2'} fontWeight={'bold'} marginY={'3rem'}>Register</Typography>
@@ -122,7 +123,7 @@ const Register = () => {
                                handlePasswordChange(event);
                            }} error={errorFlags[3]} helperText={errorMsgs[3]}/>
                 <br/>
-                <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}} onClick={registerProgress}>Register</Button>
+                <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}} onClick={registerUser}>Register</Button>
             </Box>
 
         </Container>
