@@ -3,6 +3,7 @@ import {AppBar, Avatar, Box, Button, Container, Toolbar, Typography} from "@mui/
 import {BarChart} from "@mui/icons-material";
 import {loginState} from "../store";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const NavBar = () => {
 
@@ -11,6 +12,14 @@ const NavBar = () => {
     const user = loginState(state => state.user);
     const setUser = loginState(state => state.setUser);
 
+    const logoutProcess = () => {
+
+        const headers = {
+            'X-Authorization': authorization,
+        };
+
+        axios.post('http://localhost:4941/api/v1/users/logout', {},{headers});
+    }
 
     return (
         <AppBar position="static" >
@@ -46,6 +55,7 @@ const NavBar = () => {
                                     onClick={() => {
                                         setAuthentication("");
                                         setUser({userId: -1, firstName: '', lastName: ''})
+                                        logoutProcess();
                                     }}>Logout</Button>
                         </Box>
                     )}

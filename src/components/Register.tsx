@@ -15,9 +15,14 @@ const Register = () => {
     const [lastName, setLastName] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
-    const [errorFlags, setErrorFlags] = React.useState([false,false,false,false]);
-    const [errorMsgs, setErrorMsgs] = React.useState(["", "", "", ""]);
-    const [loggedIn, setLoggedIn] = React.useState(false);
+    const [firstNameErrorFlag, setFirstNameErrorFlag] = React.useState(false);
+    const [firstNameError, setFirstNameError] = React.useState("");
+    const [lastNameErrorFlag, setLastNameErrorFlag] = React.useState(false);
+    const [lastNameError, setLastNameError] = React.useState("");
+    const [emailErrorFlag, setEmailErrorFlag] = React.useState(false);
+    const [emailError, setEmailError] = React.useState("");
+    const [passwordErrorFlag, setPasswordFlag] = React.useState(false);
+    const [passwordError, setPasswordError] = React.useState(false);
     const setUser = loginState(state => state.setUser);
     const navigate = useNavigate();
 
@@ -39,8 +44,6 @@ const Register = () => {
 
     const registerUser = () => {
 
-        // TODO - Check validity here
-
         axios.post(`http://localhost:4941/api/v1/users/register`,
             {firstName: firstName, lastName: lastName, email: email, password: password})
             .then(r => {
@@ -52,14 +55,11 @@ const Register = () => {
                         console.log(res.data.userId);
                         setAuthentication(res.data.token);
                         if (image !== null) {
-
-                            const fileData = Buffer.from(await image.arrayBuffer());
-
                             const headers = {
-                                "Content-Type": image?.type,
+                                "Content-Type": image.type,
                                 'X-Authorization': res.data.token,
                             };
-                            axios.put(`http://localhost:4941/api/v1/users/${userId}/image`, fileData, {headers})
+                            axios.put(`http://localhost:4941/api/v1/users/${userId}/image`, image, {headers})
                                 .then(res => {
                                     console.log(res.data.token)
                                     setUser({userId: r.data.userId, firstName: firstName, lastName: lastName})
@@ -70,7 +70,17 @@ const Register = () => {
                         console.log(err.toString());
                     })
             }, err => {
-                console.log(err);
+                if (firstName.length < 1 || firstName.length > 64) {
+                    setFirstNameErrorFlag(true);
+                    setFirstNameError("First name must be at least 1 character and not exceed 64 characters");
+
+                }
+                if (lastName.length < 1 || lastName.length > 64) {
+                    setLastNameErrorFlag(true);
+                    setLastNameError("Last name must be at least 1 character and not exceed 64 characters");
+                }
+
+                console.log(err.toString());
             } );
     }
 
@@ -103,25 +113,25 @@ const Register = () => {
                            value={firstName} sx={{marginTop: '2rem', width: '15rem'}}
                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                handleFirstNameChange(event);
-                           }} error={errorFlags[0]} helperText={errorMsgs[0]}/>
+                           }} error={firstNameErrorFlag} helperText={firstNameError}/>
                 <br/>
                 <TextField size={'small'} label={'Last Name'} required
                            value={lastName} sx={{marginTop: '2rem', width: '15rem'}}
                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                handleLastNameChange(event);
-                           }} error={errorFlags[1]} helperText={errorMsgs[1]}/>
+                           }} error={lastNameErrorFlag} helperText={lastNameError}/>
                 <br/>
                 <TextField size={'small'} label={'email'} required
                            value={email} sx={{marginTop: '2rem', width: '15rem'}}
                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                handleEmailChange(event);
-                           }} error={errorFlags[2]} helperText={errorMsgs[2]}/>
+                           }} error={emailErrorFlag} helperText={emailError}/>
                 <br/>
                 <TextField size={'small'} label={'Password'} required type={'password'}
                            value={password} sx={{marginTop: '2rem', width: '15rem'}}
                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                handlePasswordChange(event);
-                           }} error={errorFlags[3]} helperText={errorMsgs[3]}/>
+                           }} error={passwordErrorFlag} helperText={passwordError}/>
                 <br/>
                 <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}} onClick={registerUser}>Register</Button>
             </Box>
