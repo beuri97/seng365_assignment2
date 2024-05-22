@@ -16,6 +16,7 @@ const Register = () => {
     const [password, setPassword] = React.useState("");
     const [errorFlags, setErrorFlags] = React.useState([false,false,false,false]);
     const [errorMsgs, setErrorMsgs] = React.useState(["", "", "", ""]);
+    let userId: number = 0;
 
 
     const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +38,6 @@ const Register = () => {
             .then(res => {
                 console.log(res.data.token);
                 setAuthentication(res.data.token);
-                saveUserImage(res.data.userId);
             }, err => {
                 console.log(err.toString());
             })
@@ -45,13 +45,19 @@ const Register = () => {
 
     }
     const saveUserImage = (userId: number) => {
-        if (isNaN(userId)) return
 
         console.log(authentication);
         const headers = {
             'X-Authorization': authentication
         }
         axios.put(`http://localhost:4941/api/v1/users/${userId}/image`, {image: image}, {headers})
+
+    }
+    const registerProgress = () => {
+        registerUser();
+        logInUser(userId);
+        saveUserImage(userId);
+
 
     }
     const registerUser = () => {
@@ -62,13 +68,11 @@ const Register = () => {
             {firstName: firstName, lastName: lastName, email: email, password: password})
             .then(r => {
                 console.log(r.data.userId);
-                logInUser(r.data.userId);
+                userId = r.data.userId;
             }, err => {
                 console.log(err);
             } );
     }
-
-
     return (
         <Container style={card}>
             <Typography variant={'h2'} fontWeight={'bold'} marginY={'3rem'}>Register</Typography>
@@ -118,7 +122,7 @@ const Register = () => {
                                handlePasswordChange(event);
                            }} error={errorFlags[3]} helperText={errorMsgs[3]}/>
                 <br/>
-                <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}} onClick={registerUser}>Register</Button>
+                <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}} onClick={registerProgress}>Register</Button>
             </Box>
 
         </Container>
