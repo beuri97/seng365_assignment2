@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {JSX} from 'react';
 import './App.css';
 import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 import Petitions from './components/Petitions';
@@ -8,8 +8,18 @@ import Petition from "./components/Petition";
 import Register from "./components/Register";
 import Login from "./components/Login";
 import CreatePetition from "./components/CreatePetition";
+import {loginState} from "./store";
 
 function App() {
+
+    const auth = loginState(state => state.token);
+
+    const checkLogin = (component: JSX.Element) => {
+
+        return (auth !== "") ? component : <Login/>;
+    }
+
+
     return (
         <div className="App">
             <NavBar/>
@@ -20,7 +30,7 @@ function App() {
                     <Route path={"/petitions/:id"} element={<Petition/>}/>
                     <Route path={"/register"} element={<Register/>}/>
                     <Route path={"/login"} element={<Login/>}/>
-                    <Route path={"/petitions/create"} element={<CreatePetition/>}/>
+                    <Route path={"/petitions/create"} element={checkLogin(<CreatePetition/>)}/>
                     <Route path={"*"} element={<NotFound/>}/>
                 </Routes>
             </Router>

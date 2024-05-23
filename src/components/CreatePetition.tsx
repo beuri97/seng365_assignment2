@@ -2,7 +2,7 @@ import React from 'react'
 import {
     Box, Button,
     CardMedia,
-    Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, InputAdornment,
+    Container, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputAdornment,
     NativeSelect,
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     TextField,
@@ -11,14 +11,9 @@ import {
 import {card, title} from "../style/cssStyle";
 import {headCellTiers} from "./Petition";
 import {ImageSearch} from "@mui/icons-material";
-import {loginState, petitionStore} from "../store";
-import {useNavigate} from "react-router-dom";
+import {petitionStore} from "../store";
 
 const CreatePetition = () => {
-
-    const auth = loginState(state => state.token);
-    const nav = useNavigate();
-    if (auth === "") nav('/login');
 
     const categories : Category[] = petitionStore(state => state.categories);
 
@@ -29,16 +24,57 @@ const CreatePetition = () => {
     const [openDialog, setOpenDialog] = React.useState(false);
     const [supportTiers, setSupportTiers] = React.useState<Array<SupportTierPost>>([]);
     const [tierTitle, setTierTitle] = React.useState("");
+    const [tierTitleErrorFlag, setTierTitleErrorFlag] = React.useState(false);
+    const [tierTitleErrorMsg, setTierTitleErrorMsg] = React.useState("");
     const [tierDescription, setTierDescription] = React.useState("");
-    const [tierMinimumCost, setTierMinimumCost] = React.useState("");
+    const [tierMinimumCost, setTierMinimumCost] = React.useState(0);
+    const [tierCostErrorFlag, setTierCostErrorFlag] = React.useState(false);
+    const [tierCostErrorMsg, setTierCostErrorMsg] = React.useState("");
+
+    React.useEffect(() => {}, [supportTiers]);
 
     const handleDialogClose = () => {
 
         setOpenDialog(false);
         setTierTitle("");
         setTierDescription("");
-        setTierMinimumCost("");
+        setTierMinimumCost(0);
 
+    }
+
+    const addTier = () => {
+        const exist = supportTiers.find((tier) => tier.title === tierTitle);
+        if (exist) {
+            setTierTitleErrorFlag(true);
+            setTierTitleErrorMsg("title not unique within petition");
+        }
+        if(supportTiers.length >= 3) {
+            setTierTitleErrorFlag(true);
+            setTierTitleErrorMsg("Maximum of Support tier is exist");
+        }
+        if(Number(tierMinimumCost) < 0) {
+            setTierCostErrorFlag(true);
+            setTierCostErrorMsg("Cost cannot be negative");
+        }
+        if(tierTitleErrorFlag || tierCostErrorFlag) {
+            return;
+        }
+
+        setTierTitleErrorFlag(false);
+        setTierTitleErrorMsg("");
+        setTierCostErrorFlag(false);
+        setTierCostErrorMsg("");
+
+        supportTiers.push({title: tierTitle, description: tierDescription, cost: tierMinimumCost});
+
+        setOpenDialog(false);
+
+
+    }
+
+    const removeTier = (tier:SupportTierPost) => {
+        supportTiers.splice(supportTiers.indexOf(tier), 1);
+        setSupportTiers(supportTiers);
     }
 
     const addTierDialog = () => {
@@ -68,7 +104,7 @@ const CreatePetition = () => {
                                    style={{width: "20rem"}}
                                    value={tierMinimumCost}
                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                                       setTierMinimumCost(event.target.value);
+                                       setTierMinimumCost(!isNaN(Number(event.target.value)) ? Number(event.target.value) : 0);
                                    }}
                                    InputProps={{
                                        startAdornment: <InputAdornment position="start">$</InputAdornment>
@@ -79,7 +115,7 @@ const CreatePetition = () => {
                     <Button onClick={handleDialogClose} color="error">
                         Cancel
                     </Button>
-                    <Button onClick={handleDialogClose}>
+                    <Button onClick={addTier}>
                         Add
                     </Button>
                 </DialogActions>
@@ -91,7 +127,7 @@ const CreatePetition = () => {
     const getSupportTier = () => {
 
         return supportTiers.map(supportTier => (
-            <TableRow>
+            <TableRow key={supportTier.title}>
                 <TableCell id={'tier-description'} align={'left'} width={'900'}>
                     <Typography id={'tier-title'} variant={'h6'} fontWeight={'bold'}>{supportTier.title}</Typography>
                     <Typography color={'light-grey'}>{supportTier.description}</Typography>
@@ -100,7 +136,7 @@ const CreatePetition = () => {
                     <Typography id={'tier-cost'} variant={'h6'} fontWeight={'bold'}>$ {supportTier.cost}</Typography>
                 </TableCell>
                 <TableCell id={'support-button'}>
-                    <Button variant={'contained'}>Remove</Button>
+                    <Button variant={'contained'} onClick={() => {removeTier(supportTier)}}>Remove</Button>
                 </TableCell>
             </TableRow>
         ))
@@ -110,6 +146,7 @@ const CreatePetition = () => {
         setCategoryId(Number(event.target.value));
     }
 
+    console.log(window.location.pathname);
     return(
         <Container style={card}>
             <Typography style={title} fontWeight={'bold'}>Create Petition</Typography>
@@ -152,20 +189,25 @@ const CreatePetition = () => {
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    backgroundColor: '#f0f0f0',
                                 }}
                             >
-                                <ImageSearch sx={{ fontSize: '10rem', color: '#aaa' }} />
+                                <ImageSearch sx={{ fontSize: '10rem'}} />
                             </Box>
                         </>
                     )}
                 </label>
                 <Box id={'information-box'} display={'block'} alignContent={'top'} marginY={'1rem'}>
                     <Box id={'description-box'} textAlign={'left'}>
-                        <Typography id={'description-title'} variant={'h6'} fontWeight={'bold'}>TITLE</Typography>
-                        <TextField size={'small'} sx={{width: '20rem'}}/>
+                        <Typography id={'petition-title'} variant={'h6'} fontWeight={'bold'}>TITLE</Typography>
+                        <TextField size={'small'} sx={{width: '20rem'}} value={petitionTitle}
+                                   onChange={(event:React.ChangeEvent<HTMLInputElement>) => {
+                                       setPetitionTitle(event.target.value);
+                                   }}/>
                         <Typography id={'description-title'} marginTop={'1rem'} variant={'h6'} fontWeight={'bold'}>DESCRIPTION</Typography>
-                        <TextField InputProps={{sx: {width: '20rem', minHeight: '10rem'}}} multiline={true}/>
+                        <TextField InputProps={{sx: {width: '20rem', minHeight: '10rem'}}} multiline={true} value={petitionDescription}
+                                   onChange={(event:React.ChangeEvent<HTMLInputElement>) => {
+                                       setPetitionDescription(event.target.value);
+                                   }}/>
                         <FormControl variant="standard" sx={{display: 'flex', marginTop: '1rem'}}>
                             <Typography id={'description-title'} marginTop={'1rem'} variant={'h6'} fontWeight={'bold'}>CATEGORY</Typography>
                             <NativeSelect size={'small'}
@@ -207,6 +249,7 @@ const CreatePetition = () => {
                         </Typography>)}
                 </TableContainer>
             </Box>
+            <Button variant={'contained'} sx={{marginY: '3rem'}}>Create</Button>
         </Container>
     )
 }
