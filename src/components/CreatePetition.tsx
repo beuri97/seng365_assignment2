@@ -11,18 +11,28 @@ import {
 import {card, title} from "../style/cssStyle";
 import {headCellTiers} from "./Petition";
 import {ImageSearch} from "@mui/icons-material";
-import {petitionStore} from "../store";
+import {loginState, petitionStore} from "../store";
+import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const CreatePetition = () => {
 
     const categories : Category[] = petitionStore(state => state.categories);
+    const auth = loginState(state => state.token);
 
     const [petitionImage, setPetitionImage] = React.useState<File | null>(null);
+    const [imageErrorFlag, setImageFlag] = React.useState<boolean>(false);
     const [categoryId, setCategoryId] = React.useState(-1);
     const [petitionTitle, setPetitionTitle] = React.useState("");
+    const [petitionTitleErrorFlag, setPetitionTitleErrorFlag] = React.useState(false);
+    const [petitionTitleErrorMsg, setPetitionTitleErrorMsg] = React.useState("");
     const [petitionDescription, setPetitionDescription] = React.useState("");
-    const [openDialog, setOpenDialog] = React.useState(false);
+    const [petitionDescriptionErrorFlag, setPetitionDescriptionErrorFlag] = React.useState(false);
+    const [petitionDescriptionErrorMsg, setPetitionDescriptionErrorMsg] = React.useState("");
+    const [openAddDialog, setOpenAddDialog] = React.useState(false);
+    const [openRemoveDialog, setOpenRemoveDialog] = React.useState(false);
     const [supportTiers, setSupportTiers] = React.useState<Array<SupportTierPost>>([]);
+    const [supportTierErrorFlag, setSupportTierErrorFlag] = React.useState(false);
     const [tierTitle, setTierTitle] = React.useState("");
     const [tierTitleErrorFlag, setTierTitleErrorFlag] = React.useState(false);
     const [tierTitleErrorMsg, setTierTitleErrorMsg] = React.useState("");
@@ -30,58 +40,146 @@ const CreatePetition = () => {
     const [tierMinimumCost, setTierMinimumCost] = React.useState(0);
     const [tierCostErrorFlag, setTierCostErrorFlag] = React.useState(false);
     const [tierCostErrorMsg, setTierCostErrorMsg] = React.useState("");
+    const navigate = useNavigate();
 
-    React.useEffect(() => {}, [supportTiers]);
+    const submission = () => {
+
+        const headers = {
+            "X-Authentication" : auth
+        }
+
+        let error = false;
+
+        if (petitionImage === null) {
+            setImageFlag(true);
+            error = true;
+        }
+        else {
+            setImageFlag(false);
+        }
+
+        if (petitionDescription === "") {
+
+            setPetitionDescriptionErrorFlag(true);
+            setPetitionDescriptionErrorMsg("Must have a description");
+            error = true;
+
+        } else {
+            setPetitionDescriptionErrorFlag(false);
+        }
+
+        if (supportTiers.length === 0) {
+            setSupportTierErrorFlag(true);
+            error = true
+        }
+
+        if (!error) {
+            axios.post(`http://localhost:4941/api/v1/petitions`,
+                {title: petitionTitle,
+                    description: petitionDescription,
+                    categoryId: categoryId,
+                    supportTiers: supportTiers},
+                {headers})
+                .then(res => {
+                    if (res.status === 403) {
+                        setPetitionTitleErrorFlag(true);
+                        setPetitionTitleErrorMsg("Title is already exist");
+                    } else if (res.status === 401) {
+                        navigate("/login");
+                    } else if (res.status === 201) {
+                        navigate("/petitions");
+                    }
+                });
+        }
+    }
 
     const handleDialogClose = () => {
 
-        setOpenDialog(false);
+        setTierTitleErrorFlag(false);
+        setTierCostErrorFlag(false);
+        setTierTitleErrorMsg("");
+        setTierCostErrorMsg("");
+        setOpenAddDialog(false);
         setTierTitle("");
         setTierDescription("");
         setTierMinimumCost(0);
 
     }
 
-    const addTier = () => {
+    const addTier = (error:boolean) => {
+        if(!error){
+            setTierTitleErrorFlag(false);
+            setTierTitleErrorMsg("");
+            setTierCostErrorFlag(false);
+            setTierCostErrorMsg("");
+            setTierTitleErrorFlag(false);
+            setTierCostErrorFlag(false);
+            setOpenAddDialog(false);
+            setTierTitle("");
+            setTierDescription("");
+            setTierMinimumCost(0);
+
+            supportTiers.push({title: tierTitle, description: tierDescription, cost: tierMinimumCost});
+
+            setOpenAddDialog(false);
+        }
+    }
+
+    const checkTier = () => {
         const exist = supportTiers.find((tier) => tier.title === tierTitle);
-        if (exist) {
+        console.log(exist);
+        let error = false
+        if (exist !== undefined) {
             setTierTitleErrorFlag(true);
             setTierTitleErrorMsg("title not unique within petition");
-        }
-        if(supportTiers.length >= 3) {
-            setTierTitleErrorFlag(true);
-            setTierTitleErrorMsg("Maximum of Support tier is exist");
+            error =true;
         }
         if(Number(tierMinimumCost) < 0) {
             setTierCostErrorFlag(true);
             setTierCostErrorMsg("Cost cannot be negative");
-        }
-        if(tierTitleErrorFlag || tierCostErrorFlag) {
-            return;
+            error =true;
         }
 
-        setTierTitleErrorFlag(false);
-        setTierTitleErrorMsg("");
-        setTierCostErrorFlag(false);
-        setTierCostErrorMsg("");
-
-        supportTiers.push({title: tierTitle, description: tierDescription, cost: tierMinimumCost});
-
-        setOpenDialog(false);
+        addTier(error);
 
 
     }
 
+    const handleRemoveDialogClose = () => {
+        setOpenRemoveDialog(false);
+    }
+
+
     const removeTier = (tier:SupportTierPost) => {
         supportTiers.splice(supportTiers.indexOf(tier), 1);
         setSupportTiers(supportTiers);
+        setOpenRemoveDialog(false);
+    }
+
+    const removeTierDialog = (tier: SupportTierPost) => {
+        return(
+            <Dialog open={openRemoveDialog}
+                    onClose={handleRemoveDialogClose}>
+                <DialogTitle>
+                    {"REMOVE SUPPORT TIER"}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography fontWeight={'bold'}>Are you sure you want to remove this tier?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {removeTier(tier)}} color={'error'}>Remove</Button>
+                    <Button onClick={handleRemoveDialogClose}>Cancel</Button>
+                </DialogActions>
+
+            </Dialog>
+        )
     }
 
     const addTierDialog = () => {
 
         return (
             <Dialog
-                open={openDialog}
+                open={openAddDialog}
                 onClose={handleDialogClose}>
                 <DialogTitle>
                     {"ADD SUPPORT TIER"}
@@ -90,6 +188,8 @@ const CreatePetition = () => {
                     <Box id={'description-box'} textAlign={'left'}>
                         <Typography id={'tier-title'} variant={'h6'} fontWeight={'bold'}>TITLE</Typography>
                         <TextField size={'small'} sx={{width: '20rem'}} value={tierTitle}
+                                   error={tierTitleErrorFlag}
+                                   helperText={tierTitleErrorMsg}
                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                             setTierTitle(event.target.value);
                         }}></TextField>
@@ -98,11 +198,13 @@ const CreatePetition = () => {
                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                        setTierDescription(event.target.value);
                                    }}
-                                   multiline={true}></TextField>
+                                   multiline={true}/>
                         <Typography id={'tier-cost'} marginTop={'1rem'} variant={'h6'} fontWeight={'bold'}>COST</Typography>
                         <TextField size={"small"} id={"minimumCostField"}
                                    style={{width: "20rem"}}
                                    value={tierMinimumCost}
+                                   error={tierCostErrorFlag}
+                                   helperText={tierCostErrorMsg}
                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                        setTierMinimumCost(!isNaN(Number(event.target.value)) ? Number(event.target.value) : 0);
                                    }}
@@ -115,7 +217,7 @@ const CreatePetition = () => {
                     <Button onClick={handleDialogClose} color="error">
                         Cancel
                     </Button>
-                    <Button onClick={addTier}>
+                    <Button onClick={() => {checkTier();}}>
                         Add
                     </Button>
                 </DialogActions>
@@ -136,7 +238,8 @@ const CreatePetition = () => {
                     <Typography id={'tier-cost'} variant={'h6'} fontWeight={'bold'}>$ {supportTier.cost}</Typography>
                 </TableCell>
                 <TableCell id={'support-button'}>
-                    <Button variant={'contained'} onClick={() => {removeTier(supportTier)}}>Remove</Button>
+                    {removeTierDialog(supportTier)}
+                    <Button variant={'contained'} onClick={() => {setOpenRemoveDialog(true)}}>Remove</Button>
                 </TableCell>
             </TableRow>
         ))
@@ -178,6 +281,9 @@ const CreatePetition = () => {
                     ) : (
                         <>
                             <Typography component={'p'} paddingRight={'54px'} color={'gray'}>Click to add image</Typography>
+                            {imageErrorFlag && (<Typography component={'p'} paddingRight={'54px'} color={'error'}>
+                                Image Must Be added
+                            </Typography>)}
                             <Box
                                 sx={{
                                     height: '24rem',
@@ -200,11 +306,16 @@ const CreatePetition = () => {
                     <Box id={'description-box'} textAlign={'left'}>
                         <Typography id={'petition-title'} variant={'h6'} fontWeight={'bold'}>TITLE</Typography>
                         <TextField size={'small'} sx={{width: '20rem'}} value={petitionTitle}
+                                   error={petitionTitleErrorFlag}
+                                   helperText={petitionTitleErrorMsg}
                                    onChange={(event:React.ChangeEvent<HTMLInputElement>) => {
                                        setPetitionTitle(event.target.value);
                                    }}/>
                         <Typography id={'description-title'} marginTop={'1rem'} variant={'h6'} fontWeight={'bold'}>DESCRIPTION</Typography>
-                        <TextField InputProps={{sx: {width: '20rem', minHeight: '10rem'}}} multiline={true} value={petitionDescription}
+                        <TextField InputProps={{sx: {width: '20rem', minHeight: '10rem'}}} multiline={true}
+                                   value={petitionDescription}
+                                   error={petitionDescriptionErrorFlag}
+                                   helperText={petitionDescriptionErrorMsg}
                                    onChange={(event:React.ChangeEvent<HTMLInputElement>) => {
                                        setPetitionDescription(event.target.value);
                                    }}/>
@@ -228,7 +339,11 @@ const CreatePetition = () => {
             <Box id={'support-information'} textAlign={'left'} marginTop={'1rem'} marginLeft={'1rem'}>
                 <Typography  variant={'h4'} fontWeight={'bold'}>Support Tier</Typography>
                 {addTierDialog()}
-                <Button variant={'contained'} sx={{marginY: '1rem'}} onClick={() => {setOpenDialog(!openDialog)}}>Add</Button>
+                <Button variant={'contained'}
+                        sx={{marginY: '1rem'}}
+                        disabled={supportTiers.length >= 3}
+                        onClick={() => {setOpenAddDialog(!openAddDialog)}}>Add</Button>
+                {supportTierErrorFlag && (<Typography color={'error'}>Petition should have at least one tier.</Typography>)}
                 <TableContainer id={'tier-table-container'}>
                     <Table>
                         <TableHead>
@@ -249,7 +364,7 @@ const CreatePetition = () => {
                         </Typography>)}
                 </TableContainer>
             </Box>
-            <Button variant={'contained'} sx={{marginY: '3rem'}}>Create</Button>
+            <Button variant={'contained'} sx={{marginY: '3rem'}} onClick={() => {submission()}}>Create</Button>
         </Container>
     )
 }
