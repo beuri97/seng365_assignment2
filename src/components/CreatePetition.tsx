@@ -37,17 +37,14 @@ const CreatePetition = () => {
     const [tierTitleErrorFlag, setTierTitleErrorFlag] = React.useState(false);
     const [tierTitleErrorMsg, setTierTitleErrorMsg] = React.useState("");
     const [tierDescription, setTierDescription] = React.useState("");
+    const [tierDescriptionErrorFlag, setTierDescriptionErrorFlag] = React.useState(false);
+    const [tierDescriptionErrorMsg, setTierDescriptionErrorMsg] = React.useState("");
     const [tierMinimumCost, setTierMinimumCost] = React.useState(0);
     const [tierCostErrorFlag, setTierCostErrorFlag] = React.useState(false);
     const [tierCostErrorMsg, setTierCostErrorMsg] = React.useState("");
     const navigate = useNavigate();
 
     const submission = () => {
-
-        const headers = {
-            "X-Authentication" : auth
-        }
-
         let error = false;
 
         if (petitionImage === null) {
@@ -79,8 +76,11 @@ const CreatePetition = () => {
                     description: petitionDescription,
                     categoryId: categoryId,
                     supportTiers: supportTiers},
-                {headers})
+                {headers: {"X-Authorization" : auth}})
                 .then(res => {
+                    const id = res.data.petitionId;
+                    axios.put(`http://localhost:4941/api/v1/petitions/${id}/image`, petitionImage, {headers :{
+                        "Content-Type": petitionImage?.type, "X-Authorization" : auth}})
                     if (res.status === 403) {
                         setPetitionTitleErrorFlag(true);
                         setPetitionTitleErrorMsg("Title is already exist");
@@ -112,6 +112,8 @@ const CreatePetition = () => {
             setTierTitleErrorMsg("");
             setTierCostErrorFlag(false);
             setTierCostErrorMsg("");
+            setTierTitleErrorFlag(true);
+            setTierTitleErrorMsg("");
             setTierTitleErrorFlag(false);
             setTierCostErrorFlag(false);
             setOpenAddDialog(false);
@@ -129,15 +131,28 @@ const CreatePetition = () => {
         const exist = supportTiers.find((tier) => tier.title === tierTitle);
         console.log(exist);
         let error = false
+
+        if(tierTitle === "") {
+            setTierTitleErrorFlag(true);
+            setTierTitleErrorMsg("title cannot be empty");
+            error =true;
+        }
+
         if (exist !== undefined) {
             setTierTitleErrorFlag(true);
-            setTierTitleErrorMsg("title not unique within petition");
+            setTierTitleErrorMsg("Title not unique within petition");
             error =true;
         }
         if(Number(tierMinimumCost) < 0) {
             setTierCostErrorFlag(true);
             setTierCostErrorMsg("Cost cannot be negative");
             error =true;
+        }
+        if (tierDescription === "") {
+            setTierDescriptionErrorFlag(true);
+            setTierDescriptionErrorMsg("description cannot be empty");
+
+            error=true;
         }
 
         addTier(error);
@@ -195,6 +210,8 @@ const CreatePetition = () => {
                         }}></TextField>
                         <Typography id={'tier-description'} marginTop={'1rem'} variant={'h6'} fontWeight={'bold'}>DESCRIPTION</Typography>
                         <TextField InputProps={{sx: {width: '20rem', minHeight: '10rem'}}} value={tierDescription}
+                                   error={tierDescriptionErrorFlag}
+                                   helperText={tierDescriptionErrorMsg}
                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                        setTierDescription(event.target.value);
                                    }}

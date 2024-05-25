@@ -48,23 +48,26 @@ const Register = () => {
             {firstName: firstName, lastName: lastName, email: email, password: password})
             .then(r => {
                 console.log(r.data.userId);
-                userId = r.data.userId;
                 axios.post(`http://localhost:4941/api/v1/users/login`, {email: email, password: password})
                     .then(async res => {
                         console.log(res.data.token);
                         console.log(res.data.userId);
                         setAuthentication(res.data.token);
-                        if (image !== null) {
+                        if (image) {
                             const headers = {
                                 "Content-Type": image.type,
                                 'X-Authorization': res.data.token,
                             };
-                            axios.put(`http://localhost:4941/api/v1/users/${userId}/image`, image, {headers})
+                            console.log(r.data.userId);
+                            axios.put(`http://localhost:4941/api/v1/users/${r.data.userId}/image`, image, {headers})
                                 .then(res => {
                                     console.log(res.data.token)
                                     setUser({userId: r.data.userId, firstName: firstName, lastName: lastName})
                                     navigate('/petitions')
                                 })
+                        } else {
+                            setUser({userId: r.data.userId, firstName: firstName, lastName: lastName})
+                            navigate('/petitions');
                         }
                     }, err => {
                         console.log(err.toString());
