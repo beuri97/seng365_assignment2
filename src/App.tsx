@@ -32,8 +32,9 @@ function App() {
                     <Route path={"/register"} element={<Register/>}/>
                     <Route path={"/login"} element={<Login/>}/>
                     <Route path={"/petitions/create"} element={checkLogin(<CreatePetition/>)}/>
+                    <Route path={"/petitions/:id/edit"} element={<CreatePetition/>}/>
                     <Route path={"/users/:id"} element={<UserProfile/>}/>
-                    <Route path={"users/:id/edit"} element={<NotFound/>}/>
+                    <Route path={"/users/:id/edit"} element={<UserProfile/>}/>
                     <Route path={"*"} element={<NotFound/>}/>
                 </Routes>
             </Router>

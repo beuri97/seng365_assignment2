@@ -1,7 +1,8 @@
 type SupportTierPost = {
     title: string,
     description: string,
-    cost: number
+    cost: number,
+    open: boolean
 }
 
 type SupportTier = {

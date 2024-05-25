@@ -7,7 +7,6 @@ import {useNavigate} from "react-router-dom";
 
 const Register = () => {
 
-    const authentication = loginState(state => state.token);
     const setAuthentication = loginState(state => state.setAuthorization);
 
     const [image, setImage] = React.useState<File | null>(null);

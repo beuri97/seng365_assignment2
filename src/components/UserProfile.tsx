@@ -16,14 +16,16 @@ import {card, title} from "../style/cssStyle";
 import {Link, useParams} from "react-router-dom";
 import {loginState, petitionStore} from "../store";
 import axios from "axios";
-import Petitions, {headCells} from "./Petitions";
-import petitions from "./Petitions";
+import {headCells} from "./Petitions";
 
 const UserProfile = () => {
     const {id} = useParams();
+    const [image, setImage] = React.useState<File | null>(null);
     const [firstName, setFirstName] = React.useState("");
     const [lastName, setLastName] = React.useState("");
     const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [currentPassword, setCurrentPassword] = React.useState("");
     const isEdit = window.location.pathname.includes("edit");
     const [pageNum, setPageNum] = React.useState(1);
     const [count, setCount] = React.useState(0);
@@ -59,6 +61,17 @@ const UserProfile = () => {
                 setPetitionBySupporter(response.data['petitions']);
             })
     },[petitionByOwner])
+
+    // const editProfile = () => {
+    //     axios.patch(`http://localhost:4941/api/v1/users/${id}`, {{}})
+    // }
+
+    const removeAvatar = () => {
+        axios.delete(`http://localhost:4941/api/v1/users/${id}/image`, {headers:{'X-Authorization': auth}})
+            .then(res => {}, err=> {
+
+            });
+    }
 
     const pageChange = (event: React.ChangeEvent<unknown>, change: number) => {
         setPageNum(change);
@@ -115,7 +128,7 @@ const UserProfile = () => {
                     <Box display={'flex'} alignContent={'center'}
                          sx={{textDecoration: 'none', '&:hover':{textDecoration: 'underline'}, color: 'black'}}
                          component={'a'} href={`/users/${petition.ownerId}`}>
-                        <Avatar src={`http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
+                        <Avatar src={(image) ? URL.createObjectURL(image) : `http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
                                 alt={petition.ownerLastName}
                                 sx={{marginInline: '2rem',
                                     width: '72px',
@@ -135,18 +148,18 @@ const UserProfile = () => {
         <Container style={card} sx={{maxWidth: '120rem'}}>
             <Typography style={title}>User Profile</Typography>
             <Box display={'inline-block'} justifyContent={'center'}>
-                <input id={'petition-image-upload'}
+                <input id={'avatar-upload'}
                        type={'file'}
                        accept={'image/*'}
                        style={{display: 'none'}}
                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                            const files = event.target.files as FileList;
                            console.log(URL.createObjectURL(files[0]));
-                           // setPetitionImage(files[0]);
+                           if(id && image === null) removeAvatar()
+                           setImage(files[0]);
                        }}
                 />
                 <Box display={'inline-block'} justifyItems={'top'} component={Card}
-                     maxHeight={'35rem'}
                      elevation={3} sx={{paddingX: '3rem'}}
                      marginY={'2rem'}>
                     <Avatar src={`http://localhost:4941/api/v1/users/${id}/image`}
@@ -179,6 +192,18 @@ const UserProfile = () => {
                                            setEmail(event.target.value);
                                        }}/>
                             <br/>
+                            <TextField size={'small'} label={'password'} required
+                                       value={password} sx={{marginTop: '2rem', width: '15rem'}}
+                                       onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                           setPassword(event.target.value);
+                                       }}/>
+                            <br/>
+                            <TextField size={'small'} label={'Current Password'} required
+                                       value={currentPassword} sx={{marginTop: '2rem', width: '15rem'}}
+                                       onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                           setCurrentPassword(event.target.value);
+                                       }}/>
+                            <br/>
                             <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}}>Edit</Button>
                         </>
                     ) : (
@@ -188,7 +213,9 @@ const UserProfile = () => {
                             <Typography>{email}</Typography>
                             <br/>
                             {(user.userId === Number(id) && auth !== "") &&
-                                (<Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}}>Edit</Button>)}
+                                (<Button variant={'contained'}
+                                         component={'a'} href={`/users/${id}/edit`}
+                                         sx={{marginY: '2rem', width: '10rem'}}>Edit</Button>)}
 
                         </>
                     )}

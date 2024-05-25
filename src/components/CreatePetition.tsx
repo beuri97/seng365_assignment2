@@ -30,7 +30,6 @@ const CreatePetition = () => {
     const [petitionDescriptionErrorFlag, setPetitionDescriptionErrorFlag] = React.useState(false);
     const [petitionDescriptionErrorMsg, setPetitionDescriptionErrorMsg] = React.useState("");
     const [openAddDialog, setOpenAddDialog] = React.useState(false);
-    const [openRemoveDialog, setOpenRemoveDialog] = React.useState(false);
     const [supportTiers, setSupportTiers] = React.useState<Array<SupportTierPost>>([]);
     const [supportTierErrorFlag, setSupportTierErrorFlag] = React.useState(false);
     const [tierTitle, setTierTitle] = React.useState("");
@@ -42,6 +41,7 @@ const CreatePetition = () => {
     const [tierMinimumCost, setTierMinimumCost] = React.useState(0);
     const [tierCostErrorFlag, setTierCostErrorFlag] = React.useState(false);
     const [tierCostErrorMsg, setTierCostErrorMsg] = React.useState("");
+    const [currentTiers, setCurrentTiers] = React.useState<Array<SupportTier>>([]);
     const navigate = useNavigate();
     const {id} = useParams();
 
@@ -50,11 +50,13 @@ const CreatePetition = () => {
         if(id) {
             axios.get(`http://localhost:4941/api/v1/petitions/${id}`)
                 .then(res => {
-                    setPetitionTitle(res.data.title)
-
+                    setPetitionTitle(res.data.title);
+                    setPetitionDescription(res.data.description);
+                    setCurrentTiers(res.data.supportTiers);
+                    setCategoryId(res.data.categoryId);
                 })
         }
-    }, [id, supportTiers]);
+    }, [id]);
 
     const submission = () => {
         let error = false;
@@ -133,7 +135,7 @@ const CreatePetition = () => {
             setTierDescription("");
             setTierMinimumCost(0);
 
-            supportTiers.push({title: tierTitle, description: tierDescription, cost: tierMinimumCost});
+            supportTiers.push({title: tierTitle, description: tierDescription, cost: tierMinimumCost, open: false});
 
             setOpenAddDialog(false);
         }
@@ -172,22 +174,33 @@ const CreatePetition = () => {
 
     }
 
-    const handleRemoveDialogClose = () => {
-        setOpenRemoveDialog(false);
+    const handleRemoveDialog = (tier: SupportTierPost | SupportTier) => {
+        setSupportTiers(supportTiers.map(target => (target === tier) ? {...target, open: !target.open} : target));
+        setCurrentTiers(currentTiers.map(target => (target === tier) ? {...target, open: !target.open} : target));
     }
 
 
-    const removeTier = (title: string) => {
-        console.log(title);
-        const updatedTiers = supportTiers.filter(tier => tier.title !== title);
-        setSupportTiers(updatedTiers);
-        setOpenRemoveDialog(false);
+    const removeTier = (tierTitle: string) => {
+
+        let target = supportTiers.find((tier) => tier.title === tierTitle);
+        if(target){
+            handleRemoveDialog(target);
+            supportTiers.splice(supportTiers.indexOf(target), 1);
+            setSupportTiers(supportTiers);
+        } else {
+            let anotherTarget = currentTiers.find(tier => tier.title === tierTitle);
+            if(anotherTarget){
+                handleRemoveDialog(anotherTarget);
+                currentTiers.splice(currentTiers.indexOf(anotherTarget), 1);
+                setCurrentTiers(currentTiers);
+            }
+        }
     }
 
-    const removeTierDialog = (tierTitle: string) => {
+    const removeTierDialog = (tier: SupportTierPost | SupportTier) => {
         return(
-            <Dialog open={openRemoveDialog}
-                    onClose={handleRemoveDialogClose}>
+            <Dialog open={tier.open}
+                    onClose={handleRemoveDialog}>
                 <DialogTitle>
                     {"REMOVE SUPPORT TIER"}
                 </DialogTitle>
@@ -195,8 +208,8 @@ const CreatePetition = () => {
                     <Typography fontWeight={'bold'}>Are you sure you want to remove this tier?</Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => {removeTier(tierTitle)}} color={'error'}>Remove</Button>
-                    <Button onClick={handleRemoveDialogClose}>Cancel</Button>
+                    <Button onClick={() => {removeTier(tier.title)}} color={'error'}>Remove</Button>
+                    <Button onClick={() => {handleRemoveDialog(tier)}}>Cancel</Button>
                 </DialogActions>
 
             </Dialog>
@@ -256,9 +269,9 @@ const CreatePetition = () => {
 
     }
 
-    const getSupportTier = () => {
+    const getSupportTier = (tiers: SupportTierPost[] | SupportTier[]) => {
 
-        return supportTiers.map(supportTier => (
+        return tiers.map((supportTier) => (
             <TableRow key={supportTier.title}>
                 <TableCell id={'tier-description'} align={'left'} width={'900'}>
                     <Typography id={'tier-title'} variant={'h6'} fontWeight={'bold'}>{supportTier.title}</Typography>
@@ -268,8 +281,9 @@ const CreatePetition = () => {
                     <Typography id={'tier-cost'} variant={'h6'} fontWeight={'bold'}>$ {supportTier.cost}</Typography>
                 </TableCell>
                 <TableCell id={'support-button'}>
-                    {removeTierDialog(supportTier.title)}
-                    <Button variant={'contained'} onClick={() => {setOpenRemoveDialog(true)}}>Remove</Button>
+                    {removeTierDialog(supportTier)}
+                    <Button variant={'contained'} color={'error'}
+                            onClick={() => {handleRemoveDialog(supportTier)}}>Remove</Button>
                 </TableCell>
             </TableRow>
         ))
@@ -296,10 +310,10 @@ const CreatePetition = () => {
                 />
                 <label htmlFor={'petition-image-upload'}>
                     <Typography component={'p'} paddingRight={'54px'} color={'gray'}>Click to add image</Typography>
-                    {petitionImage ? (
+                    {petitionImage || id ? (
                         <CardMedia
                             component="img"
-                            src={URL.createObjectURL(petitionImage)}
+                            src={(id !== undefined) ? `http://localhost:4941/api/v1/petitions/${id}/image` : (petitionImage) ? URL.createObjectURL(petitionImage) : ""}
                             sx={{
                                 height: '24rem',
                                 marginLeft: '1rem',
@@ -371,7 +385,7 @@ const CreatePetition = () => {
                 {addTierDialog()}
                 <Button variant={'contained'}
                         sx={{marginY: '1rem'}}
-                        disabled={supportTiers.length >= 3}
+                        disabled={(supportTiers.length + currentTiers.length) >= 3}
                         onClick={() => {setOpenAddDialog(!openAddDialog)}}>Add</Button>
                 {supportTierErrorFlag && (<Typography color={'error'}>Petition should have at least one tier.</Typography>)}
                 <TableContainer id={'tier-table-container'}>
@@ -385,16 +399,20 @@ const CreatePetition = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {getSupportTier()}
+                            {getSupportTier(supportTiers)}
+                            {getSupportTier(currentTiers)}
                         </TableBody>
                     </Table>
-                    {supportTiers.length === 0 && (
+                    {(supportTiers.length + currentTiers.length) === 0 && (
                         <Typography fontStyle={'italic'} display={'flex'} justifyContent={'center'} marginTop={'1rem'}>
                             No Support Tier is Added
                         </Typography>)}
                 </TableContainer>
             </Box>
-            <Button variant={'contained'} sx={{marginY: '3rem'}} onClick={() => {submission()}}>Create</Button>
+            {(id) ? (
+                <Button variant={'contained'} sx={{marginY: '3rem'}} onClick={() => {submission()}}>Edit</Button>
+            ) : (<Button variant={'contained'} sx={{marginY: '3rem'}} onClick={() => {submission()}}>Create</Button>)}
+
         </Container>
     )
 }

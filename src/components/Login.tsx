@@ -1,20 +1,18 @@
 import React from "react";
 import {Box, Button, Card, Container, TextField, Typography} from "@mui/material";
-import {card, title} from "../style/cssStyle";
+import {card} from "../style/cssStyle";
 import {loginState} from "../store";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
 const Login = () => {
 
-    const authentication = loginState(state => state.token);
     const setAuthentication = loginState(state => state.setAuthorization);
     const setUser = loginState(state => state.setUser);
 
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
-    const [errorFlags, setErrorFlags] = React.useState([false,false]);
-    const [errorMsgs, setErrorMsgs] = React.useState(["", ""]);
+    const [errorFlags, setErrorFlags] = React.useState(false);
     const navigate = useNavigate();
 
     const loginProcess = () => {
@@ -25,7 +23,7 @@ const Login = () => {
                 setAuthentication(res.data.token);
                 getLoginDetail(res.data.userId);
             }, err => {
-                console.log(err.toString());
+                setErrorFlags(true);
             })
     }
 
@@ -33,7 +31,7 @@ const Login = () => {
         axios.get(`http://localhost:4941/api/v1/users/${id}`)
             .then(res => {
                 setUser({userId: id, firstName: res.data.firstName, lastName: res.data.lastName})
-                navigate(-1);
+                navigate('/petitions');
             })
     }
 
@@ -53,13 +51,16 @@ const Login = () => {
                            value={email} sx={{marginTop: '2rem', width: '15rem'}}
                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                handleEmailChange(event);
-                           }} error={errorFlags[0]} helperText={errorMsgs[0]}/>
+                           }}/>
                 <br/>
                 <TextField size={'small'} label={'Password'} required type={'password'}
                            value={password} sx={{marginTop: '2rem', width: '15rem'}}
                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                handlePasswordChange(event);
-                           }} error={errorFlags[1]} helperText={errorMsgs[1]}/>
+                           }}/>
+                <br/>
+                {errorFlags && (<Typography color={'red'}>Invalid email or password</Typography>)}
+
                 <br/>
                 <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}} onClick={loginProcess}>Login</Button>
             </Box>

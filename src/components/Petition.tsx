@@ -3,7 +3,7 @@ import {
     Avatar,
     Box, Button,
     CardMedia,
-    Container,
+    Container, Dialog, DialogActions, DialogContent, DialogTitle,
     Table, TableBody,
     TableCell,
     TableContainer,
@@ -12,8 +12,8 @@ import {
     Typography
 } from "@mui/material";
 import {card, title} from "../style/cssStyle";
-import {useParams} from "react-router-dom";
-import {petitionStore} from "../store";
+import {useNavigate, useParams} from "react-router-dom";
+import {loginState, petitionStore} from "../store";
 import axios from "axios";
 
 interface headCellTier {
@@ -81,6 +81,11 @@ const Petition = () => {
     const setErrorFlag = petitionStore(state => state.setErrorFlag);
     const errorMsg = petitionStore(state => state.errorMsg);
     const setErrorMsg = petitionStore(state => state.setErrorMsg);
+    const user = loginState(state => state.user);
+    const auth = loginState(state => state.token);
+    const [deleteErrorFlag, setDeleteErrorFlag] = React.useState(false);
+    const [openDialog, setOpenDialog] = React.useState(false);
+    const navigate = useNavigate();
 
 
 
@@ -121,6 +126,34 @@ const Petition = () => {
             })
     }, [petition]);
 
+    const handleDialogClose = () => {
+        setOpenDialog(false);
+    }
+
+    const confirmDialog = () => {
+        return (
+            <Dialog
+                open={openDialog}
+                onClose={handleDialogClose}>
+                <DialogTitle>
+                    {"DELETING PETITION"}
+                </DialogTitle>
+                <DialogContent>
+                    <Typography fontWeight={'bold'}>Are you Sure?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>
+                        Cancel
+                    </Button>
+                    <Button color={'error'} onClick={() => {handleRemovePetition()}}>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            )
+
+    }
+
 
     const getSupportTier = () => {
 
@@ -144,6 +177,19 @@ const Petition = () => {
         const tier = petition.supportTiers.find(t => t.supportTierId === supporter.supportTierId);
 
         return tier?.title;
+    }
+
+    const handleRemovePetition = () => {
+
+        if(supporters.length > 0)
+            setDeleteErrorFlag(true);
+        else {
+            axios.delete(`http://localhost:4941/api/v1/petitions/${id}`, {headers: {'X-Authorization' : auth}})
+                .then(res => {
+                    navigate('/petitions');
+                });
+        }
+
     }
 
     const getSupporter = () => {
@@ -290,6 +336,10 @@ const Petition = () => {
                         </Box>
                     </Box>
                 </Container>
+                {confirmDialog()}
+                {(deleteErrorFlag) && (<Typography color={'error'}>Cannot Delete Petition as Supporter Already Exist</Typography>)}
+                {(user.userId === petition.ownerId) && (<Button variant={'contained'} component={'a'} href={`/petitions/${id}/edit`}>EDIT</Button>)}
+                {(user.userId === petition.ownerId) && (<Button variant={'contained'} color={'error'} onClick={() => {setOpenDialog(true)}}>REMOVE</Button>)}
 
                 <Typography variant={'h6'} fontWeight={'bold'}
                             textAlign={'left'} marginTop={"4rem"} marginBottom={'1rem'}>Available Support Tier</Typography>
