@@ -33,10 +33,9 @@ const Login = () => {
         axios.get(`http://localhost:4941/api/v1/users/${id}`)
             .then(res => {
                 setUser({userId: id, firstName: res.data.firstName, lastName: res.data.lastName})
-                navigate('/petitions');
+                navigate(-1);
             })
     }
-
 
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(e.target.value);

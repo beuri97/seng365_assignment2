@@ -13,7 +13,7 @@ import {headCellTiers} from "./Petition";
 import {ImageSearch} from "@mui/icons-material";
 import {loginState, petitionStore} from "../store";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 
 const CreatePetition = () => {
 
@@ -43,6 +43,18 @@ const CreatePetition = () => {
     const [tierCostErrorFlag, setTierCostErrorFlag] = React.useState(false);
     const [tierCostErrorMsg, setTierCostErrorMsg] = React.useState("");
     const navigate = useNavigate();
+    const {id} = useParams();
+
+
+    React.useEffect(() => {
+        if(id) {
+            axios.get(`http://localhost:4941/api/v1/petitions/${id}`)
+                .then(res => {
+                    setPetitionTitle(res.data.title)
+
+                })
+        }
+    }, [id, supportTiers]);
 
     const submission = () => {
         let error = false;
@@ -165,13 +177,14 @@ const CreatePetition = () => {
     }
 
 
-    const removeTier = (tier:SupportTierPost) => {
-        supportTiers.splice(supportTiers.indexOf(tier), 1);
-        setSupportTiers(supportTiers);
+    const removeTier = (title: string) => {
+        console.log(title);
+        const updatedTiers = supportTiers.filter(tier => tier.title !== title);
+        setSupportTiers(updatedTiers);
         setOpenRemoveDialog(false);
     }
 
-    const removeTierDialog = (tier: SupportTierPost) => {
+    const removeTierDialog = (tierTitle: string) => {
         return(
             <Dialog open={openRemoveDialog}
                     onClose={handleRemoveDialogClose}>
@@ -182,7 +195,7 @@ const CreatePetition = () => {
                     <Typography fontWeight={'bold'}>Are you sure you want to remove this tier?</Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => {removeTier(tier)}} color={'error'}>Remove</Button>
+                    <Button onClick={() => {removeTier(tierTitle)}} color={'error'}>Remove</Button>
                     <Button onClick={handleRemoveDialogClose}>Cancel</Button>
                 </DialogActions>
 
@@ -255,7 +268,7 @@ const CreatePetition = () => {
                     <Typography id={'tier-cost'} variant={'h6'} fontWeight={'bold'}>$ {supportTier.cost}</Typography>
                 </TableCell>
                 <TableCell id={'support-button'}>
-                    {removeTierDialog(supportTier)}
+                    {removeTierDialog(supportTier.title)}
                     <Button variant={'contained'} onClick={() => {setOpenRemoveDialog(true)}}>Remove</Button>
                 </TableCell>
             </TableRow>
@@ -282,6 +295,7 @@ const CreatePetition = () => {
                        }}
                 />
                 <label htmlFor={'petition-image-upload'}>
+                    <Typography component={'p'} paddingRight={'54px'} color={'gray'}>Click to add image</Typography>
                     {petitionImage ? (
                         <CardMedia
                             component="img"
@@ -297,7 +311,6 @@ const CreatePetition = () => {
                         />
                     ) : (
                         <>
-                            <Typography component={'p'} paddingRight={'54px'} color={'gray'}>Click to add image</Typography>
                             {imageErrorFlag && (<Typography component={'p'} paddingRight={'54px'} color={'error'}>
                                 Image Must Be added
                             </Typography>)}

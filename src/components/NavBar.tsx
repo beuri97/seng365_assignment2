@@ -40,7 +40,9 @@ const NavBar = () => {
                     )}
                     {authorization !== "" && (
                         <Box marginRight={'11vw'} display={'inline-flex'}>
-                            <Box display={'flex'} alignItems={'center'} >
+                            <Box display={'flex'} alignItems={'center'}
+                                 component={'a'} href={`/users/${user.userId}`}
+                                 sx={{textDecoration: 'none', display: 'flex', color: 'inherit'}}>
                                 <Avatar src={`http://localhost:4941/api/v1/users/${user.userId}/image`}
                                         sx={{marginInline: '0.5rem',
                                             width:  '40px',
@@ -48,7 +50,9 @@ const NavBar = () => {
                                 <Typography alignContent={'center'}>
                                     {user.firstName + ' ' + user.lastName}
                                 </Typography>
+
                             </Box>
+
                             <Button variant={'text'} color={'inherit'} href={'/petitions'}
                                     component={'a'} sx={{marginLeft: '1rem'}}
                                     onClick={() => {

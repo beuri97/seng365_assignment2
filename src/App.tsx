@@ -9,6 +9,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import CreatePetition from "./components/CreatePetition";
 import {loginState} from "./store";
+import UserProfile from "./components/UserProfile";
 
 function App() {
 
@@ -31,6 +32,8 @@ function App() {
                     <Route path={"/register"} element={<Register/>}/>
                     <Route path={"/login"} element={<Login/>}/>
                     <Route path={"/petitions/create"} element={checkLogin(<CreatePetition/>)}/>
+                    <Route path={"/users/:id"} element={<UserProfile/>}/>
+                    <Route path={"users/:id/edit"} element={<NotFound/>}/>
                     <Route path={"*"} element={<NotFound/>}/>
                 </Routes>
             </Router>
