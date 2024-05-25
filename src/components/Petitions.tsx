@@ -173,7 +173,9 @@ const Petitions = () => {
                 </TableCell>
 
                 <TableCell>
-                    <Box display={'flex'} alignContent={'center'}>
+                    <Box display={'flex'} alignContent={'center'}
+                         sx={{textDecoration: 'none', '&:hover':{textDecoration: 'underline'}, color: 'black'}}
+                         component={'a'} href={`/users/${petition.ownerId}`}>
                         <Avatar src={`http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
                                 alt={petition.ownerLastName}
                                 sx={{marginInline: '2rem',
@@ -315,3 +317,4 @@ const Petitions = () => {
 }
 
 export default Petitions;
+export {headCells};

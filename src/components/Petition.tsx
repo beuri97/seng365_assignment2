@@ -162,7 +162,9 @@ const Petition = () => {
                     <Typography>{supporter.timestamp.split('T')[0]}</Typography>
                 </TableCell>
                 <TableCell>
-                    <Box display={'flex'} alignItems={'center'}>
+                    <Box display={'flex'} alignItems={'center'}
+                         sx={{textDecoration: 'none', '&:hover':{textDecoration: 'underline'}, color: 'black'}}
+                         component={'a'} href={`/users/${supporter.supporterId}`}>
                         <Avatar src={`http://localhost:4941/api/v1/users/${supporter.supporterId}/image`}
                                 alt={"Hello"}
                                 sx={{marginInline: '0.5rem',
@@ -223,7 +225,9 @@ const Petition = () => {
                 </TableCell>
 
                 <TableCell>
-                    <Box display={'flex'} alignContent={'center'}>
+                    <Box display={'flex'} alignContent={'center'}
+                         sx={{textDecoration: 'none', '&:hover':{textDecoration: 'underline'}, color: 'black'}}
+                         component={'a'} href={`/users/${petition.ownerId}`}>
                         <Avatar src={`http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
                                 alt={petition.ownerLastName}
                                 sx={{marginInline: '2rem',
@@ -254,14 +258,17 @@ const Petition = () => {
                     </Box>
                     <Box display={'flex'} alignItems={'center'}>
                         <Typography marginRight={'2rem'} fontWeight={'bold'}>Owner:</Typography>
-                        <Avatar src={`http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
-                                alt={"Hello"}
-                                sx={{marginInline: '0.5rem',
-                                    width:  '55px',
-                                    height: '55px'}}/>
-                        <Typography alignContent={'center'}>
-                            {petition.ownerFirstName + ' ' + petition.ownerLastName}
-                        </Typography>
+                        <Box display={'flex'} alignItems={'center'}
+                             sx={{textDecoration: 'none', '&:hover':{textDecoration: 'underline'}, color: 'black'}}
+                             component={'a'} href={`/users/${petition.ownerId}`}>
+                            <Avatar src={`http://localhost:4941/api/v1/users/${petition.ownerId}/image`}
+                                    sx={{marginInline: '0.5rem',
+                                        width:  '55px',
+                                        height: '55px'}}/>
+                            <Typography alignContent={'center'}>
+                                {petition.ownerFirstName + ' ' + petition.ownerLastName}
+                            </Typography>
+                        </Box>
                     </Box>
                 </Container>
 
