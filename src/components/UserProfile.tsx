@@ -92,30 +92,31 @@ const UserProfile = () => {
         if(emailChange) data = {...data, email:email};
         if(passwordChange) data = {...data, password:password, currentPassword:currentPassword};
 
+        if (firstName.length < 1 || firstName.length > 64) {
+            setFirstNameErrorFlag(true);
+            setFirstNameError("First name must be at least 1 character and not exceed 64 characters");
+
+        }
+        if (lastName.length < 1 || lastName.length > 64) {
+            setLastNameErrorFlag(true);
+            setLastNameError("Last name must be at least 1 character and not exceed 64 characters");
+        }
+        if(!email.match(emailRegex())){
+            setEmailErrorFlag(true);
+            setEmailError("email must be in right format such as x@y.z");
+        }
+        if(password.length < 6) {
+            setPasswordErrorFlag(true);
+            setPasswordError("Password must be at least 6 characters long");
+        }
+
         axios.patch(`http://localhost:4941/api/v1/users/${id}`, {data}, {headers:{'X-Authorization': auth}})
             .then(res => {
                 navigate('/petitions');
             }, err => {
-                if (firstName.length < 1 || firstName.length > 64) {
-                    setFirstNameErrorFlag(true);
-                    setFirstNameError("First name must be at least 1 character and not exceed 64 characters");
-
-                }
-                if (lastName.length < 1 || lastName.length > 64) {
-                    setLastNameErrorFlag(true);
-                    setLastNameError("Last name must be at least 1 character and not exceed 64 characters");
-                }
                 if (err.response.status === 403) {
                     setEmailErrorFlag(true);
                     setEmailError("email is already in use");
-                }
-                if(!email.match(emailRegex())){
-                    setEmailErrorFlag(true);
-                    setEmailError("email must be in right format such as x@y.z");
-                }
-                if(password.length < 6) {
-                    setPasswordErrorFlag(true);
-                    setPasswordError("Password must be at least 6 characters long");
                 }
                 if(err.response.message.includes("Identical current and new passwords")) {
                     setPasswordErrorFlag(true);
@@ -231,6 +232,8 @@ const UserProfile = () => {
                         <>
                             <TextField size={'small'} label={'First Name'} required
                                        value={firstName} sx={{marginTop: '2rem', width: '15rem'}}
+                                       error={firstNameErrorFlag}
+                                       helperText={firstNameError}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                            setFirstNameChange(true);
                                            setFirstName(event.target.value);
@@ -238,6 +241,8 @@ const UserProfile = () => {
                             <br/>
                             <TextField size={'small'} label={'Last Name'} required
                                        value={lastName} sx={{marginTop: '2rem', width: '15rem'}}
+                                       error={lastNameErrorFlag}
+                                       helperText={lastNameErrorFlag}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                            setLastNameChange(true);
                                            setLastName(event.target.value);
@@ -245,6 +250,8 @@ const UserProfile = () => {
                             <br/>
                             <TextField size={'small'} label={'email'} required
                                        value={email} sx={{marginTop: '2rem', width: '15rem'}}
+                                       error={emailErrorFlag}
+                                       helperText={emailError}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                            setEmailChange(true);
                                            setEmail(event.target.value);
@@ -252,6 +259,8 @@ const UserProfile = () => {
                             <br/>
                             <TextField size={'small'} label={'password'} required
                                        value={password} sx={{marginTop: '2rem', width: '15rem'}}
+                                       error={passwordErrorFlag}
+                                       helperText={passwordError}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                            setPasswordChange(true);
                                            setPassword(event.target.value);
@@ -259,6 +268,8 @@ const UserProfile = () => {
                             <br/>
                             <TextField size={'small'} label={'Current Password'} required
                                        value={currentPassword} sx={{marginTop: '2rem', width: '15rem'}}
+                                       error={currentPasswordErrorFlag}
+                                       helperText={currentPasswordError}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                                            setCurrentPassword(event.target.value);
                                        }}/>
@@ -308,15 +319,10 @@ const UserProfile = () => {
                                 <Pagination count={page} page={pageNum} sx={{display: 'flex', justifyContent: 'center', marginY: '1rem'}}
                                             showFirstButton showLastButton onChange={pageChange}/>
                             </Stack>
-
                         </TableContainer>
-
                     </Box>
                 )}
-
             </Box>
-
-
         </Container>
 
     )

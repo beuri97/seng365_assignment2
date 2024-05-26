@@ -25,6 +25,13 @@ type Petition = {
     supportTiers: SupportTier[],
 }
 
+type PetitionPost = {
+    title: string,
+    description: string,
+    categoryId: number,
+    supportTiers: SupportTierPost[]
+}
+
 type Category = {
     categoryId: number,
     name: string,

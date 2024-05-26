@@ -58,6 +58,57 @@ const CreatePetition = () => {
         }
     }, [id]);
 
+    const edit = () => {
+
+        let error = false;
+
+        if (petitionDescription === "") {
+
+            setPetitionDescriptionErrorFlag(true);
+            setPetitionDescriptionErrorMsg("Must have a description");
+            error = true;
+
+        } else {
+            setPetitionDescriptionErrorFlag(false);
+        }
+
+        if ((supportTiers.length + currentTiers.length) === 0) {
+            setSupportTierErrorFlag(true);
+            error = true
+        }
+
+        let data: any = {title: petitionTitle, description: petitionDescription, categoryId: categoryId};
+
+        if (!error) {
+            axios.patch(`http://localhost:4941/api/v1/petitions/${id}`, data, {headers: {"X-Authorization" : auth}})
+                .then(res => {
+                    const id = res.data.petitionId;
+                    // if(petitionImage !== null) {
+                    //     axios.put(`http://localhost:4941/api/v1/petitions/${id}/image`, petitionImage, {headers :{
+                    //             "Content-Type": petitionImage?.type, "X-Authorization" : auth}})
+                    // }
+                    if (res.status === 403) {
+                        setPetitionTitleErrorFlag(true);
+                        setPetitionTitleErrorMsg("Title is already exist");
+                    } else if (res.status === 401) {
+                        navigate("/login");
+                    } else if (res.status === 200) {
+                        navigate("/petitions");
+                    }
+                });
+
+            if(supportTiers.length !== 0) {
+                supportTiers.map(
+                    tier => {
+                        axios.put(`http://localhost:4941/api/v1/petitions/${id}/supportTiers`,
+                            {title: tier.title, description: tier.description, cost: tier.cost}, {headers: {"X-Authorization" : auth}})
+                    }
+                )
+            }
+        }
+
+    }
+
     const submission = () => {
         let error = false;
 
@@ -79,7 +130,7 @@ const CreatePetition = () => {
             setPetitionDescriptionErrorFlag(false);
         }
 
-        if (supportTiers.length === 0) {
+        if ((supportTiers.length + currentTiers.length) === 0) {
             setSupportTierErrorFlag(true);
             error = true
         }
@@ -191,6 +242,9 @@ const CreatePetition = () => {
             let anotherTarget = currentTiers.find(tier => tier.title === tierTitle);
             if(anotherTarget){
                 handleRemoveDialog(anotherTarget);
+                axios.delete(`http://localhost:4941/api/v1/petitions/${id}/supportTiers/${anotherTarget.supportTierId}`,{headers:{'X-Authorization':auth}})
+                    .then(res => {
+                    })
                 currentTiers.splice(currentTiers.indexOf(anotherTarget), 1);
                 setCurrentTiers(currentTiers);
             }
@@ -410,7 +464,7 @@ const CreatePetition = () => {
                 </TableContainer>
             </Box>
             {(id) ? (
-                <Button variant={'contained'} sx={{marginY: '3rem'}} onClick={() => {submission()}}>Edit</Button>
+                <Button variant={'contained'} sx={{marginY: '3rem'}} onClick={() => {edit()}}>Edit</Button>
             ) : (<Button variant={'contained'} sx={{marginY: '3rem'}} onClick={() => {submission()}}>Create</Button>)}
 
         </Container>
