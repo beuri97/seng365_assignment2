@@ -13,19 +13,34 @@ import {
     Typography
 } from "@mui/material";
 import {card, title} from "../style/cssStyle";
-import {Link, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import {loginState, petitionStore} from "../store";
 import axios from "axios";
 import {headCells} from "./Petitions";
+import emailRegex from "email-regex";
 
 const UserProfile = () => {
     const {id} = useParams();
     const [image, setImage] = React.useState<File | null>(null);
     const [firstName, setFirstName] = React.useState("");
+    const [firstNameChange, setFirstNameChange] = React.useState(false);
+    const [firstNameErrorFlag, setFirstNameErrorFlag] = React.useState(false);
+    const [firstNameError, setFirstNameError] = React.useState("");
     const [lastName, setLastName] = React.useState("");
+    const [lastNameChange, setLastNameChange] = React.useState(false);
+    const [lastNameErrorFlag, setLastNameErrorFlag] = React.useState(false);
+    const [lastNameError, setLastNameError] = React.useState("");
     const [email, setEmail] = React.useState("");
+    const [emailChange, setEmailChange] = React.useState(false);
+    const [emailErrorFlag, setEmailErrorFlag] = React.useState(false);
+    const [emailError, setEmailError] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [passwordChange, setPasswordChange] = React.useState(false);
+    const [passwordErrorFlag, setPasswordErrorFlag] = React.useState(false);
+    const [passwordError, setPasswordError] = React.useState("");
     const [currentPassword, setCurrentPassword] = React.useState("");
+    const [currentPasswordErrorFlag, setCurrentPasswordErrorFlag] = React.useState(false);
+    const [currentPasswordError, setCurrentPasswordError] = React.useState("");
     const isEdit = window.location.pathname.includes("edit");
     const [pageNum, setPageNum] = React.useState(1);
     const [count, setCount] = React.useState(0);
@@ -36,6 +51,7 @@ const UserProfile = () => {
     const categories = petitionStore(state => state.categories);
     const [petitionByOwner, setPetitionByOwner] = React.useState([]);
     const [petitionBySupporter, setPetitionBySupporter] = React.useState([]);
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         axios.get(`http://localhost:4941/api/v1/users/${id}`,{headers:{'X-Authorization': auth}})
@@ -62,14 +78,53 @@ const UserProfile = () => {
             })
     },[petitionByOwner])
 
-    // const editProfile = () => {
-    //     axios.patch(`http://localhost:4941/api/v1/users/${id}`, {{}})
-    // }
-
     const removeAvatar = () => {
         axios.delete(`http://localhost:4941/api/v1/users/${id}/image`, {headers:{'X-Authorization': auth}})
             .then(res => {}, err=> {
 
+            });
+    }
+
+    const updateUser = () => {
+        let data = {};
+        if(firstNameChange) data = {...data, firstName:firstName};
+        if(lastNameChange) data = {...data, lastName:lastName};
+        if(emailChange) data = {...data, email:email};
+        if(passwordChange) data = {...data, password:password, currentPassword:currentPassword};
+
+        axios.patch(`http://localhost:4941/api/v1/users/${id}`, {data}, {headers:{'X-Authorization': auth}})
+            .then(res => {
+                navigate('/petitions');
+            }, err => {
+                if (firstName.length < 1 || firstName.length > 64) {
+                    setFirstNameErrorFlag(true);
+                    setFirstNameError("First name must be at least 1 character and not exceed 64 characters");
+
+                }
+                if (lastName.length < 1 || lastName.length > 64) {
+                    setLastNameErrorFlag(true);
+                    setLastNameError("Last name must be at least 1 character and not exceed 64 characters");
+                }
+                if (err.response.status === 403) {
+                    setEmailErrorFlag(true);
+                    setEmailError("email is already in use");
+                }
+                if(!email.match(emailRegex())){
+                    setEmailErrorFlag(true);
+                    setEmailError("email must be in right format such as x@y.z");
+                }
+                if(password.length < 6) {
+                    setPasswordErrorFlag(true);
+                    setPasswordError("Password must be at least 6 characters long");
+                }
+                if(err.response.message.includes("Identical current and new passwords")) {
+                    setPasswordErrorFlag(true);
+                    setPasswordError("Identical current and new passwords");
+                }
+                if (err.response.status === 401) {
+                    setCurrentPasswordErrorFlag(true);
+                    setCurrentPasswordError("Wrong password");
+                }
             });
     }
 
@@ -177,24 +232,28 @@ const UserProfile = () => {
                             <TextField size={'small'} label={'First Name'} required
                                        value={firstName} sx={{marginTop: '2rem', width: '15rem'}}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                           setFirstNameChange(true);
                                            setFirstName(event.target.value);
                                        }}/>
                             <br/>
                             <TextField size={'small'} label={'Last Name'} required
                                        value={lastName} sx={{marginTop: '2rem', width: '15rem'}}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                           setLastNameChange(true);
                                            setLastName(event.target.value);
                                        }}/>
                             <br/>
                             <TextField size={'small'} label={'email'} required
                                        value={email} sx={{marginTop: '2rem', width: '15rem'}}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                           setEmailChange(true);
                                            setEmail(event.target.value);
                                        }}/>
                             <br/>
                             <TextField size={'small'} label={'password'} required
                                        value={password} sx={{marginTop: '2rem', width: '15rem'}}
                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                           setPasswordChange(true);
                                            setPassword(event.target.value);
                                        }}/>
                             <br/>
@@ -204,7 +263,7 @@ const UserProfile = () => {
                                            setCurrentPassword(event.target.value);
                                        }}/>
                             <br/>
-                            <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}}>Edit</Button>
+                            <Button variant={'contained'} sx={{marginY: '2rem', width: '10rem'}} onClick={updateUser}>Edit</Button>
                         </>
                     ) : (
                         <>
