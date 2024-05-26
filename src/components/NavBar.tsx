@@ -3,7 +3,6 @@ import {AppBar, Avatar, Box, Button, Container, Toolbar, Typography} from "@mui/
 import {BarChart} from "@mui/icons-material";
 import {loginState} from "../store";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
 
 const NavBar = () => {
 

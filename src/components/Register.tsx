@@ -1,9 +1,10 @@
-import React, {ChangeEvent} from 'react';
+import React from 'react';
 import {card} from "../style/cssStyle";
 import {Avatar, Box, Button, Card, Container, TextField, Typography} from "@mui/material";
 import axios from "axios";
 import {loginState} from "../store";
 import {useNavigate} from "react-router-dom";
+import emailRegex from "email-regex";
 
 const Register = () => {
 
@@ -20,12 +21,10 @@ const Register = () => {
     const [lastNameError, setLastNameError] = React.useState("");
     const [emailErrorFlag, setEmailErrorFlag] = React.useState(false);
     const [emailError, setEmailError] = React.useState("");
-    const [passwordErrorFlag, setPasswordFlag] = React.useState(false);
-    const [passwordError, setPasswordError] = React.useState(false);
+    const [passwordErrorFlag, setPasswordErrorFlag] = React.useState(false);
+    const [passwordError, setPasswordError] = React.useState("");
     const setUser = loginState(state => state.setUser);
     const navigate = useNavigate();
-
-    let userId: number = 0;
 
 
     const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,6 +41,14 @@ const Register = () => {
     }
 
     const registerUser = () => {
+        setFirstNameErrorFlag(false);
+        setFirstNameError("");
+        setLastNameErrorFlag(false);
+        setLastNameError("");
+        setEmailErrorFlag(false);
+        setEmailError("");
+        setPasswordErrorFlag(false);
+        setPasswordError("");
 
         axios.post(`http://localhost:4941/api/v1/users/register`,
             {firstName: firstName, lastName: lastName, email: email, password: password})
@@ -72,6 +79,7 @@ const Register = () => {
                         console.log(err.toString());
                     })
             }, err => {
+                console.log(err);
                 if (firstName.length < 1 || firstName.length > 64) {
                     setFirstNameErrorFlag(true);
                     setFirstNameError("First name must be at least 1 character and not exceed 64 characters");
@@ -80,6 +88,18 @@ const Register = () => {
                 if (lastName.length < 1 || lastName.length > 64) {
                     setLastNameErrorFlag(true);
                     setLastNameError("Last name must be at least 1 character and not exceed 64 characters");
+                }
+                if (err.response.status === 403) {
+                    setEmailErrorFlag(true);
+                    setEmailError("email is already in use");
+                }
+                if(!email.match(emailRegex())){
+                    setEmailErrorFlag(true);
+                    setEmailError("email must be in right format such as x@y.z");
+                }
+                if(password.length < 6) {
+                    setPasswordErrorFlag(true);
+                    setPasswordError("Password must be at least 6 characters long");
                 }
 
                 console.log(err.toString());
